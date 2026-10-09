@@ -118,7 +118,7 @@ fileInput.addEventListener("change",async()=>{
   const unknown=imported.filter(f=>!f.kind);
   if(unknown.length)throw new Error("Unrecognized spreadsheet columns: "+unknown.map(f=>f.name).join(", "));
   const existing=load()||{bad:[],upcoming:[]};
-  for(const file of imported)existing[file.kind]=file.rows.map(r=>normalize(r,file.kind)).filter(Boolean);
+  for(const file of imported)existing[file.kind]=file.rows.map(r=>normalize(r,file.kind)).filter(Boolean).filter(row=>outstanding(row));
   existing.updated=Date.now();
   localStorage.setItem(KEY,JSON.stringify(existing));
   render(existing);window.dispatchEvent(new Event("eod:reports-updated"));
