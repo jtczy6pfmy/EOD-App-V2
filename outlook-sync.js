@@ -119,7 +119,7 @@ fileInput.addEventListener("change",async()=>{
   for(const file of imported)existing[file.kind]=file.rows.map(r=>normalize(r,file.kind)).filter(Boolean);
   existing.updated=Date.now();
   localStorage.setItem(KEY,JSON.stringify(existing));
-  render(existing);
+  render(existing);window.dispatchEvent(new Event("eod:reports-updated"));
  }catch(error){status.textContent="Import failed: "+error.message}
  finally{importButton.disabled=false;fileInput.value=""}
 });
@@ -134,7 +134,7 @@ async function cloudRefresh(ask=false){
   if(!reports.length){status.textContent="Cloud connected · Waiting for emailed reports";return}
   const data=load()||{upcoming:[],bad:[]};
   for(const report of reports)if(report.report_type==="bad"||report.report_type==="upcoming")data[report.report_type]=report.rows.filter(row=>outstanding(row));
-  data.updated=Date.now();localStorage.setItem(KEY,JSON.stringify(data));render(data);
+  data.updated=Date.now();localStorage.setItem(KEY,JSON.stringify(data));render(data);window.dispatchEvent(new Event("eod:reports-updated"));
   status.textContent="Updated "+new Date().toLocaleString();
  }catch(error){status.textContent=error.message}
 }
@@ -153,7 +153,7 @@ if(addInspection&&chassisNumber&&chassisPrefix){
   if(pending&&chassisNumber.value===""&&/^(?:AIMZ|NSPZ|NSFZ)/.test(pending)){
    const ids=completed();ids.add(pending);localStorage.setItem(COMPLETED_KEY,JSON.stringify([...ids]));
    const data=load();if(data){for(const kind of ["upcoming","bad"])data[kind]=(data[kind]||[]).filter(row=>assetKey(row)!==pending);localStorage.setItem(KEY,JSON.stringify(data))}
-   render(load());
+   render(load());window.dispatchEvent(new Event("eod:reports-updated"));
   }
   pending="";
  });
