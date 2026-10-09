@@ -24,6 +24,7 @@ button{width:100%;padding:11px 18px;border:none;border-radius:6px;font-weight:80
 @media(max-width:768px){.cloud-status-text{display:none}.header-inner{gap:6px}.cloud-status-wrap{margin-left:8px}.header-title{white-space:normal}.equipment-tabs{gap:3px;padding:8px}.equipment-tab{font-size:.85rem}}
 </style>
 <link rel="stylesheet" href="./madmartian-v2.css?v=2">
+<link rel="stylesheet" href="./madmartian-rendering.css?v=1">
 </head>
 <body>
 <header><div class="header-inner"><img src="https://jtczy6pfmy.github.io/EOD-App/eod-icon.PNG" class="header-icon-img" alt="EOD Icon"><div class="header-title">EOD Inspection Report</div></div><div class="cloud-status-wrap"><button id="cloudStatus" class="cloud-status" type="button" data-state="idle" aria-label="Choose a terminal" title="Choose a terminal"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M11 31h20a7 7 0 0 0 0-14 11 11 0 0 0-21-3 8.5 8.5 0 0 0 1 17Z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="2.5"/><path class="cloud-check" d="m14 22 4 4 8-9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span id="cloudStatusText" class="cloud-status-text" role="status" aria-live="polite">Choose a terminal</span></div><div class="header-logo"><div class="logo-text"><span class="brand-name">ASPECT</span><span class="brand-sub">ASSOCIATES</span></div></div></header>
@@ -165,5 +166,6 @@ equipmentTabs.forEach((tab,index)=>{tab.addEventListener('click',()=>activateTab
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="./outlook-sync.js?v=16"></script>
 <script src="./madmartian-v2.js?v=2"></script>
+<script src="./madmartian-rendering.js?v=1"></script>
 </body>
 </html>
