@@ -11,8 +11,9 @@ function markCompleted(row){const ids=completed();ids.add(assetKey(row));localSt
 const outstanding=row=>allowedChassis(row)&&!completed().has(assetKey(row));
 function uniqueOutstanding(rows){const seen=new Set();return (rows||[]).filter(row=>{if(!outstanding(row))return false;const id=assetKey(row);if(seen.has(id))return false;seen.add(id);return true})}
 const HEADERS=["Lot Loc","Eq Init Nr","Mate Init Nr","Hold List","Hold Category","Dwell DD HH"];
-let sortColumn="Lot Loc",sortDirection=1,selectedLots=null,reportView="all",selectedAsset="";
-window.addEventListener("eod:report-view",event=>{reportView=["all","upcoming","bad"].includes(event.detail)?event.detail:"all";render(load())});
+let sortColumn="Lot Loc",sortDirection=1,selectedLots=null,reportView="all",selectedAsset="",holdListFilter="";
+window.addEventListener("eod:report-view",event=>{reportView=["all","upcoming","bad"].includes(event.detail)?event.detail:"all";holdListFilter="";render(load())});
+window.addEventListener("eod:show-bocz",()=>{reportView="bad";holdListFilter="BOCZ";selectedLots=null;selectedAsset="";render(load())});
 const sorter=new Intl.Collator(undefined,{numeric:true,sensitivity:"base"});
 const allowedChassis=row=>/^(?:AIMZ|NSPZ|NSFZ)/i.test(String(row["Eq Init Nr"]||"").trim());
 const fileInput=document.createElement("input");
@@ -76,11 +77,11 @@ function render(data){
  if(!data){status.textContent="No saved reports yet";results.textContent="Tap Sync to load your reports.";return}
  const upcoming=(data.upcoming||[]).filter(row=>outstanding(row));
  const bad=(data.bad||[]).filter(row=>outstanding(row));
- const allRows=[...(reportView==="bad"?[]:upcoming),...(reportView==="upcoming"?[]:bad)];
+ const allRows=[...(reportView==="bad"?[]:upcoming),...(reportView==="upcoming"?[]:bad)].filter(row=>!holdListFilter||String(row["Hold List"]||"").trim().toUpperCase()===holdListFilter);
  const lots=[...new Set(allRows.map(row=>String(row["Lot Loc"]||"").trim()))].sort(sorter.compare);
  const rows=allRows.filter(row=>selectedLots===null||selectedLots.has(String(row["Lot Loc"]||"").trim())).sort((a,b)=>sortDirection*sorter.compare(String(a[sortColumn]??""),String(b[sortColumn]??"")));
  if(selectedAsset&&!allRows.some(row=>assetKey(row)===selectedAsset))selectedAsset="";
- const summary=document.createElement("p");summary.textContent=upcoming.length+" upcoming inspections · "+bad.length+" bad orders · "+rows.length+" shown"+(reportView==="all"?"":" · "+(reportView==="bad"?"Bad orders":"Upcoming")+" view");results.append(summary);
+ const summary=document.createElement("p");summary.textContent=upcoming.length+" upcoming inspections · "+bad.length+" bad orders · "+rows.length+" shown"+(reportView==="all"?"":" · "+(reportView==="bad"?"Bad orders":"Upcoming")+" view"+(holdListFilter?" · Hold List: "+holdListFilter:""));results.append(summary);
  const selectionBar=document.createElement("div");selectionBar.className="eod-selection-bar";selectionBar.setAttribute("role","status");const selectionLabel=document.createElement("span");selectionLabel.textContent=selectedAsset?"Selected chassis: "+selectedAsset:"Tap any row to select a chassis for inspection";const inspectSelected=document.createElement("button");inspectSelected.type="button";inspectSelected.textContent="INSPECT SELECTED →";inspectSelected.disabled=!selectedAsset;inspectSelected.addEventListener("click",()=>{if(!selectedAsset)return;window.dispatchEvent(new CustomEvent("eod:inspect-selected",{detail:{asset:selectedAsset}}))});const clearSelection=document.createElement("button");clearSelection.type="button";clearSelection.textContent="CLEAR";clearSelection.disabled=!selectedAsset;clearSelection.addEventListener("click",()=>{selectedAsset="";render(load())});selectionBar.append(selectionLabel,inspectSelected,clearSelection);results.append(selectionBar);
  const wrap=document.createElement("div");wrap.style.overflowX="auto";
  const table=document.createElement("table");table.style.cssText="width:100%;border-collapse:collapse;font-size:1rem";
@@ -157,6 +158,7 @@ if(addInspection&&chassisNumber&&chassisPrefix){
    const ids=completed();ids.add(pending);localStorage.setItem(COMPLETED_KEY,JSON.stringify([...ids]));
    const data=load();if(data){for(const kind of ["upcoming","bad"])data[kind]=(data[kind]||[]).filter(row=>assetKey(row)!==pending);localStorage.setItem(KEY,JSON.stringify(data))}
    render(load());window.dispatchEvent(new Event("eod:reports-updated"));
+   window.dispatchEvent(new CustomEvent("eod:inspection-removed",{detail:{asset:pending}}));
   }
   pending="";
  });
