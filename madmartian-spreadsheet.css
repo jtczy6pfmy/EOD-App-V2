@@ -45,3 +45,38 @@
   font-size:18px!important;
   min-height:48px!important;
 }
+
+
+/* Higher contrast inspection list while retaining the Mad Martian palette */
+#outlookSyncResults table{background:#203d2c!important;}
+#outlookSyncResults table thead th{
+  background:#315c40!important;
+  color:#e0ffca!important;
+  border-bottom:2px solid #78b66a!important;
+}
+#outlookSyncResults table tbody tr,
+#outlookSyncResults .eod-data-row{
+  background:#254532!important;
+}
+#outlookSyncResults table tbody tr:nth-child(even),
+#outlookSyncResults .eod-data-row:nth-child(even){
+  background:#31543c!important;
+}
+#outlookSyncResults table tbody td{
+  color:#f6fff6!important;
+  border-bottom:1px solid #50745b!important;
+}
+#outlookSyncResults table tbody tr:hover,
+#outlookSyncResults .eod-data-row:hover{
+  background:#426c4c!important;
+}
+#outlookSyncResults .eod-data-row.eod-row-selected,
+#outlookSyncResults .eod-data-row.eod-row-selected:nth-child(even){
+  background:#4a7951!important;
+  box-shadow:inset 6px 0 #a8ff76!important;
+}
+#outlookSyncResults .eod-selection-bar{
+  background:#294b35!important;
+  color:#f6fff6!important;
+  border-color:#729b75!important;
+}
