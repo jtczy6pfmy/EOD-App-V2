@@ -13,7 +13,7 @@ function uniqueOutstanding(rows){const seen=new Set();return (rows||[]).filter(r
 const HEADERS=["Lot Loc","Eq Init Nr","Mate Init Nr","Hold List","Hold Category","Dwell DD HH"];
 let sortColumn="Lot Loc",sortDirection=1,selectedLots=null,reportView="all",selectedAsset="",holdListFilter="";
 window.addEventListener("eod:report-view",event=>{reportView=["all","upcoming","bad"].includes(event.detail)?event.detail:"all";holdListFilter="";render(load())});
-window.addEventListener("eod:show-bocz",()=>{reportView="bad";holdListFilter="BOCZ";selectedLots=null;selectedAsset="";render(load())});
+window.addEventListener("eod:show-bocz",()=>{reportView="bad";holdListFilter="";selectedLots=null;selectedAsset="";render(load())});
 const sorter=new Intl.Collator(undefined,{numeric:true,sensitivity:"base"});
 const allowedChassis=row=>/^(?:AIMZ|NSPZ|NSFZ)/i.test(String(row["Eq Init Nr"]||"").trim());
 const fileInput=document.createElement("input");
