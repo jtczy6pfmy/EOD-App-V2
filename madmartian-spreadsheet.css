@@ -135,3 +135,20 @@
   color:#d6ffbb!important;
   border-color:#7aaf63!important;
 }
+
+
+/* RAID Companion table styling: cyan headers, orange selections */
+#outlookSyncResults{color:#f6f7fa!important}
+#outlookSyncResults table{background:#0e141a!important;border:1px solid #2b6577!important}
+#outlookSyncResults table thead th{background:#142633!important;color:#26d9ec!important;border-bottom:2px solid #2b9bb0!important;text-shadow:none!important}
+#outlookSyncResults table th button{background:transparent!important;color:#26d9ec!important}
+#outlookSyncResults table tbody tr,#outlookSyncResults .eod-data-row{background:#10161d!important}
+#outlookSyncResults table tbody tr:nth-child(even),#outlookSyncResults .eod-data-row:nth-child(even){background:#192630!important}
+#outlookSyncResults table tbody td{color:#f6f7fa!important;border-bottom:1px solid #294453!important}
+#outlookSyncResults table tbody tr:hover,#outlookSyncResults .eod-data-row:hover{background:#293c46!important}
+#outlookSyncResults .eod-data-row.eod-row-selected,#outlookSyncResults .eod-data-row.eod-row-selected:nth-child(even){background:#50351f!important;box-shadow:inset 6px 0 #ffad39!important}
+#outlookSyncResults .eod-data-row.eod-row-selected td{color:#fff!important;border-bottom-color:#c17a2b!important}
+#outlookSyncResults .eod-data-row:focus-visible{outline:3px solid #22d3e6!important}
+#outlookSyncResults .eod-selection-bar{background:#15222b!important;border:1px solid #347184!important;color:#f6f7fa!important}
+#outlookSyncResults .eod-selection-bar button{background:#ff9d28!important;color:#17110b!important}
+#outlookSyncResults .eod-selection-bar button:last-child{background:#1b2b35!important;color:#d8e6ee!important;border:1px solid #347184!important}
