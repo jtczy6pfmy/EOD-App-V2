@@ -96,7 +96,7 @@ function total(){return inspectionTotal()+Math.floor((Number(data.tireAudits)||0
 function sectionFor(type){return window.EODState.section(type)}
 function sixDigitsOnly(input){input.value=input.value.replace(/\D/g,"").slice(0,6)}
 function updateChassisNumberField(){const isAimz=terminal.value==="HARRISBURG"&&prefix.value==="AIMZ";const input=document.getElementById("number"),label=document.getElementById("chassisNumberLabel");if(isAimz){input.maxLength=5;input.placeholder="Enter 5 digits";label.textContent="5-Digit Number";input.value=input.value.replace(/\D/g,"").slice(0,5)}else{input.maxLength=6;input.placeholder="Enter 6 digits";label.textContent="6-Digit Number";input.value=input.value.replace(/\D/g,"").slice(0,6)}}
-function progress(){const n=total(),currentTarget=getTarget();count.textContent=n;if(targetDisplay)targetDisplay.textContent=currentTarget;fill.style.width=Math.min(100,n/currentTarget*100)+"%";document.getElementById("completeMessage").classList.toggle("show",n>=currentTarget)}
+function progress(){const n=total(),currentTarget=getTarget();count.textContent=n;if(targetDisplay)targetDisplay.textContent=currentTarget;fill.style.width=Math.min(100,n/currentTarget*100)+"%";document.getElementById("completeMessage").classList.toggle("show",n>=currentTarget);window.dispatchEvent(new Event("eod:inspection-data-changed"))}
 function canAdd(category,type,number,excludeId,replacing){if(!terminal.value){alert("Please select a terminal first.");terminal.focus();return false}const error=window.EODState.validate(category,type,number,terminal.value,allRecords().filter(record=>!replacing||record.category!==replacing.category||record.type!==replacing.type||record.number!==replacing.number),excludeId);if(error){alert(error);return false}return true}
 function escapeHtml(value){return String(value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function applyState(state){
@@ -183,7 +183,7 @@ equipmentTabs.forEach((tab,index)=>{tab.addEventListener('click',()=>activateTab
 <script src="./milestone.js?v=3"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="./outlook-sync.js?v=20"></script>
-<script src="./madmartian-v2.js?v=2"></script>
+<script src="./madmartian-v2.js?v=3"></script>
 <script src="./madmartian-rendering.js?v=1"></script>
 <script src="./madmartian-screens.js?v=7"></script>
 <script src="./madmartian-reference.js?v=1"></script>
