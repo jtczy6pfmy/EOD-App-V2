@@ -83,3 +83,10 @@ button.secondary,.preview-actions .secondary{background:#1a2832!important;color:
 .progressbar{background:#28343d!important}
 .progressbar .fill{background:#ff9d28!important}
 @media(max-width:1000px){.mm-side{border-top-color:#8b5a27!important}}
+
+/* Dashboard progress bar — RAID-inspired charcoal, cyan and amber */
+.mm-daily-progress{grid-column:1/-1;background:#161a20;border:1px solid #286073;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+.mm-daily-progress-head{display:flex;justify-content:space-between;align-items:center;gap:12px;color:#26d9ec;font-size:13px;letter-spacing:1px}
+.mm-daily-progress-head span{color:#f6f7fa;font-size:18px;font-weight:800;letter-spacing:0}
+.mm-daily-progress .progressbar{height:16px;background:#29343d!important;border-radius:12px;overflow:hidden}
+.mm-daily-progress .progressbar .fill{height:100%;background:linear-gradient(90deg,#20c8df,#ff9d28)!important;transition:width .35s ease}
