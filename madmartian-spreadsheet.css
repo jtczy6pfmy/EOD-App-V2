@@ -80,3 +80,58 @@
   color:#f6fff6!important;
   border-color:#729b75!important;
 }
+
+
+/* RAID Companion inspired charcoal + neon green inspection theme */
+#outlookSyncResults{
+  color:#f5f7f8!important;
+}
+#outlookSyncResults table{
+  background:#11161b!important;
+  border:1px solid #46525a!important;
+}
+#outlookSyncResults table thead th{
+  background:#252d35!important;
+  color:#baff74!important;
+  border-bottom:2px solid #8df45a!important;
+  text-shadow:none!important;
+}
+#outlookSyncResults table tbody tr,
+#outlookSyncResults .eod-data-row{
+  background:#171d24!important;
+}
+#outlookSyncResults table tbody tr:nth-child(even),
+#outlookSyncResults .eod-data-row:nth-child(even){
+  background:#242c34!important;
+}
+#outlookSyncResults table tbody td{
+  color:#f5f7f8!important;
+  border-bottom:1px solid #45515b!important;
+}
+#outlookSyncResults table tbody tr:hover,
+#outlookSyncResults .eod-data-row:hover{
+  background:#34413d!important;
+}
+#outlookSyncResults .eod-data-row.eod-row-selected,
+#outlookSyncResults .eod-data-row.eod-row-selected:nth-child(even){
+  background:#344c3a!important;
+  box-shadow:inset 6px 0 #a1ff5e!important;
+}
+#outlookSyncResults .eod-data-row.eod-row-selected td{
+  color:#fff!important;
+  border-bottom-color:#69966a!important;
+}
+#outlookSyncResults .eod-selection-bar{
+  background:#252d35!important;
+  border:1px solid #57646c!important;
+  color:#f5f7f8!important;
+}
+#outlookSyncResults .eod-selection-bar button{
+  background:#a1ff5e!important;
+  color:#101713!important;
+}
+#outlookSyncResults .eod-selection-bar button:last-child{
+  background:#343f47!important;
+  color:#d6ffbb!important;
+  border-color:#7aaf63!important;
+}
