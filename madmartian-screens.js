@@ -1,10 +1,10 @@
 (()=>{'use strict';const app=document.querySelector('main.app');if(!app)return;
 const persistentHero=app.querySelector('.mm-hero');if(persistentHero){persistentHero.classList.add('mm-persistent-hero');document.body.insertBefore(persistentHero,app)}const dashboard=document.createElement('div');dashboard.className='mm-screen mm-dashboard';dashboard.id='mm-dashboard';for(const selector of ['.mm-hero','.mm-metrics','.mm-board']){const el=app.querySelector(selector);if(el)dashboard.append(el)}
-// Place the original live inspection progress (including milestone feedback) between dashboard rows 2 and 3.
+// Place the original live inspection progress (including milestone feedback) between dashboard rows 1 and 2.
 const terminalProgress=document.getElementById('count')?.closest('.card-body');
 const dashboardProgress=app.querySelector('.mm-daily-progress');
 if(terminalProgress&&dashboardProgress){dashboardProgress.replaceChildren();dashboardProgress.classList.add('mm-original-progress');const heading=document.createElement('div');heading.className='mm-daily-progress-head';heading.innerHTML='<strong>DAILY INSPECTION PROGRESS</strong>';dashboardProgress.append(heading);const counter=terminalProgress.querySelector('.status-progress-number');const bar=terminalProgress.querySelector('.progressbar');const milestone=terminalProgress.querySelector('#milestonePopup');const complete=terminalProgress.querySelector('#completeMessage');for(const element of [counter,bar,milestone,complete])if(element)dashboardProgress.append(element)}
-if(dashboardProgress)dashboard.append(dashboardProgress);
+if(dashboardProgress){const board=dashboard.querySelector('.mm-board');if(board)dashboard.insertBefore(dashboardProgress,board);else dashboard.append(dashboardProgress)}
 const dashboardBottom=app.querySelector('.mm-bottom');if(dashboardBottom)dashboard.append(dashboardBottom);
 const workspace=document.createElement('div');workspace.className='mm-screen mm-workspace';workspace.id='mm-workspace';
 const heading=document.createElement('div');heading.className='mm-workspace-title';heading.innerHTML='<span>OPERATIONS / WORKSPACE</span><h2 id="mm-workspace-heading">Inspections</h2><button type="button" id="mm-back-dashboard">← BACK TO DASHBOARD</button>';workspace.append(heading);
