@@ -47,3 +47,39 @@ button.secondary,.preview-actions .secondary{background:#35414b!important;color:
 .progressbar{background:#394650!important}
 .progressbar .fill{background:#a1ff5e!important}
 @media(max-width:1000px){.mm-side{border-top-color:#53616c!important}}
+
+
+/* RAID Companion reference: orange primary, cyan details, charcoal surfaces.
+   Branding artwork is intentionally untouched. */
+:root{--navy-dark:#0c0e12;--navy-header:#151a20;--yellow-primary:#ff9d28;--bg-light:#0c0e12;--card-bg:#161a20;--border-color:#285665;--text-dark:#f6f7fa;--text-muted:#b9c1cb;--input-bg:#0c1218}
+body{background:#0c0e12!important;color:#f6f7fa!important}
+header{background:linear-gradient(105deg,#151a20,#10252c)!important;border-color:#286073!important;border-bottom:2px solid #ff9d28!important}
+header .brand-name{color:#ffad39!important}
+.card{background:#161a20!important;border-color:#285665!important;color:#f6f7fa!important}
+.card-header-styled{background:linear-gradient(90deg,#1a222a,#10252d)!important;border-bottom:1px solid #2d6575!important}
+.card h2,.mm-activity h2{color:#f6f7fa!important}
+label,.tally-code,.mm-section-heading{color:#22d3e6!important}
+.tally-item,.chassis-summary-item,.static-type{background:#151c24!important;border-color:#32606b!important;color:#f6f7fa!important}
+input,select,textarea{background:#0b1218!important;color:#f6f7fa!important;border:1px solid #366979!important}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid #22d3e6!important}
+button:not(.equipment-tab){background:linear-gradient(90deg,#ff9225,#ffb23e)!important;color:#17110b!important}
+button.secondary,.preview-actions .secondary{background:#1a2832!important;color:#f6f7fa!important;border:1px solid #347184!important}
+#outlookSyncButton{background:linear-gradient(90deg,#ff9225,#ffb23e)!important;color:#17110b!important}
+.mm-side{background:linear-gradient(165deg,#111419,#090d11)!important;border-color:#8b5a27!important}
+.mm-nav{color:#e9edf3!important}
+.mm-nav.active,.mm-nav:hover{background:linear-gradient(90deg,#ff9225,#ffb23e)!important;color:#17110b!important}
+.mm-footer,.mm-subtitle,.mm-filter-hint{color:#b9c1cb!important}
+.mm-metric{background:#161a20!important;border-color:#8b5a27!important}
+.mm-metric span,.mm-metric strong{color:#f6f7fa!important}
+.mm-activity{background:#161a20!important;border-color:#286073!important}
+.mm-activity ul{color:#dbe2e9!important}
+.mm-report-tab{background:#16242e!important;color:#f6f7fa!important;border-color:#2c6578!important}
+.mm-report-tab.active{background:linear-gradient(90deg,#ff9225,#ffb23e)!important;color:#17110b!important}
+.equipment-tab{background:#16242e!important;color:#f6f7fa!important;border-color:#2c6578!important}
+.equipment-tab[aria-selected="true"]{background:#ff9d28!important;color:#17110b!important}
+#outlookSyncStatus,#inspectionList{color:#f6f7fa!important}
+#eodLotFilterPanel{background:#171d24!important;color:#f6f7fa!important;border-color:#347184!important}
+#eodLotFilterPanel label{color:#22d3e6!important}
+.progressbar{background:#28343d!important}
+.progressbar .fill{background:#ff9d28!important}
+@media(max-width:1000px){.mm-side{border-top-color:#8b5a27!important}}
