@@ -13,6 +13,9 @@ const working=document.getElementById('upcomingBadOrders');const completed=docum
 if(working)views['Upcoming & Bad Orders'].append(working);
 if(sidebar)views['Add Inspection'].append(sidebar);
 if(entry)views['Add Inspection'].append(entry);
+// Row 3: keep the existing live Tire Audits and Tallies controls together below the equipment entry.
+const auditTallies=sidebar?.querySelector('.audit-tally-row');
+if(auditTallies){auditTallies.classList.add('mm-inspection-row-three');views['Add Inspection'].append(auditTallies)}
 if(completed)views.Completed.append(completed);
 if(notes)views.Reports.append(notes);
 if(preview)views.Reports.append(preview);
