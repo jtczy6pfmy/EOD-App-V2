@@ -3,3 +3,20 @@ body>header{display:none!important}body>.mm-subtitle{display:none!important}main
 .mm-workspace-view[data-view="Add Inspection"]>.mm-inspection-row-three{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px;width:100%}
 .mm-workspace-view[data-view="Add Inspection"]>.mm-inspection-row-three>.card{min-width:0;margin:0}
 @media(max-width:560px){.mm-workspace-view[data-view="Add Inspection"]>.mm-inspection-row-three{grid-template-columns:1fr}}
+
+/* iPad landscape: fill the available area beside the navigation. */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+main.app{max-width:none!important;width:100%!important;min-width:0!important;margin:0!important}
+.mm-workspace{width:100%!important;max-width:none!important;min-width:0!important;margin:0!important}
+.mm-workspace-view{width:100%;min-width:0}
+.mm-workspace-view>.card,.mm-workspace-view>.sidebar-stack,.mm-workspace-view>.equipment-entry{width:100%;max-width:none;min-width:0}
+.mm-workspace-view .equipment-panel,.mm-workspace-view .equipment-panel>.card{min-width:0;width:100%}
+.mm-workspace-view .equipment-tabs{background:#15232c!important;border:1px solid #2b6476!important;border-bottom:0!important;color:#f6f7fa!important;padding:10px!important;gap:8px}
+.mm-workspace-view .equipment-entry{background:#161a20!important;border-color:#2b6476!important}
+.mm-workspace-view .equipment-tab{background:#16242e!important;color:#f6f7fa!important;border:1px solid #2b6476!important}
+.mm-workspace-view .equipment-tab[aria-selected="true"]{background:linear-gradient(90deg,#ff9225,#ffb23e)!important;color:#17110b!important;border-color:#ff9d28!important}
+@media (orientation:landscape) and (min-width:1051px){
+ body{padding-right:12px!important;padding-left:310px!important}
+ .mm-workspace{max-width:none!important}
+ .mm-workspace-view[data-view="Add Inspection"]>.mm-inspection-row-three{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
