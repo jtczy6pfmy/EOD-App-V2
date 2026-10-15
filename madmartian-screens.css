@@ -20,3 +20,7 @@ main.app{max-width:none!important;width:100%!important;min-width:0!important;mar
  .mm-workspace{max-width:none!important}
  .mm-workspace-view[data-view="Add Inspection"]>.mm-inspection-row-three{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+/* Add Inspection row 1: matching dashboard progress colors and full-width layout. */
+.mm-workspace-view[data-view="Add Inspection"]>.mm-inspection-progress{width:100%;margin:16px 0;box-sizing:border-box}
+.mm-inspection-progress .mm-daily-progress-head span{color:#f6f7fa;font-size:18px;font-weight:800}
