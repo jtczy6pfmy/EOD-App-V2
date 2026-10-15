@@ -12,6 +12,25 @@ const views={};for(const name of ['Upcoming & Bad Orders','Add Inspection','Comp
 const working=document.getElementById('upcomingBadOrders');const completed=document.getElementById('mm-completed')||document.getElementById('inspectionList')?.closest('section.card');const entry=app.querySelector('section.equipment-entry');const terminal=document.getElementById('terminal')?.closest('section.card');const sidebar=app.querySelector('.sidebar-stack');const notes=document.getElementById('generateEod')?.closest('section.card');const preview=document.getElementById('previewCard');
 if(working)views['Upcoming & Bad Orders'].append(working);
 if(sidebar)views['Add Inspection'].append(sidebar);
+// Row 1: mirrored daily progress; dashboard retains the original live progress controls.
+if(dashboardProgress){
+ const inspectionProgress=document.createElement('section');
+ inspectionProgress.className='mm-daily-progress mm-inspection-progress';
+ inspectionProgress.setAttribute('aria-label','Daily inspection progress');
+ inspectionProgress.innerHTML='<div class="mm-daily-progress-head"><strong>DAILY INSPECTION PROGRESS</strong><span id="mm-inspection-progress-count">0 / 28</span></div><div class="progressbar" role="progressbar" aria-label="Daily inspection progress" aria-valuemin="0" aria-valuemax="28" aria-valuenow="0"><div class="fill" id="mm-inspection-progress-fill"></div></div>';
+ views['Add Inspection'].append(inspectionProgress);
+ const syncInspectionProgress=()=>{
+  const current=Number(document.getElementById('count')?.textContent)||0;
+  const target=Math.max(1,Number(document.getElementById('targetDisplay')?.textContent)||28);
+  inspectionProgress.querySelector('#mm-inspection-progress-count').textContent=current+' / '+target;
+  inspectionProgress.querySelector('#mm-inspection-progress-fill').style.width=Math.min(100,current/target*100)+'%';
+  const bar=inspectionProgress.querySelector('[role="progressbar"]');
+  bar.setAttribute('aria-valuenow',String(current));bar.setAttribute('aria-valuemax',String(target));
+ };
+ window.addEventListener('eod:inspection-data-changed',syncInspectionProgress);
+ window.addEventListener('eod:recovered',()=>setTimeout(syncInspectionProgress,0));
+ syncInspectionProgress();
+}
 if(entry)views['Add Inspection'].append(entry);
 // Row 3: keep the existing live Tire Audits and Tallies controls together below the equipment entry.
 const auditTallies=sidebar?.querySelector('.audit-tally-row');
