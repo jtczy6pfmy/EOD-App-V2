@@ -69,3 +69,15 @@ main.app{max-width:none!important;width:100%!important;min-width:0!important;mar
   grid-column:1!important;grid-row:2!important;
  }
 }
+
+/* Use all available landscape width; reserve a narrow right action rail. */
+@media(min-width:851px) and (orientation:landscape){
+ html,body{width:100%;max-width:none}
+ main.app{width:calc(100% - 24px)!important;max-width:none!important;margin:0 12px!important}
+ .mm-workspace,.mm-workspace-view{width:100%!important;max-width:none!important}
+ .mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout{
+  grid-template-columns:minmax(0,1fr) 230px!important;
+  gap:12px!important;
+ }
+ .mm-workspace-view[data-view="Upcoming & Bad Orders"] #upcomingBadOrders{width:100%!important;max-width:none!important}
+}
