@@ -104,7 +104,7 @@ if(inspectNav){
 }
 
 function show(name){if(!names.includes(name))name='Dashboard';active=name;const home=name==='Dashboard';if(persistentHero){persistentHero.hidden=false;persistentHero.style.display='flex';}dashboard.hidden=!home;workspace.hidden=home;for(const [key,el] of Object.entries(views))el.hidden=home||key!==name;tabs.forEach((b,i)=>{b.classList.toggle('active',i!==5&&names[i]===name);b.setAttribute('aria-current',names[i]===name?'page':'false')});if(!home)document.getElementById('mm-workspace-heading').textContent=name;window.scrollTo({top:0,behavior:'instant'});document.documentElement.scrollTop=0;document.body.scrollTop=0}
-tabs.forEach((b,i)=>b.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();show(names[i])},true));
+tabs.forEach((b,i)=>{if(b===inspectNav)return;b.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();show(names[i])},true)});
 document.getElementById('mm-back-dashboard').addEventListener('click',()=>show('Dashboard'));
 document.getElementById('mm-settings-terminal').addEventListener('click',()=>{show('Add Inspection');document.getElementById('terminal')?.focus()});
 document.querySelectorAll('.mm-board [data-go]').forEach(button=>button.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();show('Upcoming & Bad Orders');const view=button.dataset.go==='bad'?'bad':'upcoming';window.dispatchEvent(new CustomEvent('eod:report-view',{detail:view}))},true));
