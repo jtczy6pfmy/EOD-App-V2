@@ -32,25 +32,6 @@ if(working){
  }
 }
 if(sidebar)views['Add Inspection'].append(sidebar);
-// Row 1: mirrored daily progress; dashboard retains the original live progress controls.
-if(dashboardProgress){
- const inspectionProgress=document.createElement('section');
- inspectionProgress.className='mm-daily-progress mm-inspection-progress';
- inspectionProgress.setAttribute('aria-label','Daily inspection progress');
- inspectionProgress.innerHTML='<div class="mm-daily-progress-head"><strong>DAILY INSPECTION PROGRESS</strong><span id="mm-inspection-progress-count">0 / 28</span></div><div class="progressbar" role="progressbar" aria-label="Daily inspection progress" aria-valuemin="0" aria-valuemax="28" aria-valuenow="0"><div class="fill" id="mm-inspection-progress-fill"></div></div>';
- views['Add Inspection'].append(inspectionProgress);
- const syncInspectionProgress=()=>{
-  const current=Number(document.getElementById('count')?.textContent)||0;
-  const target=Math.max(1,Number(document.getElementById('targetDisplay')?.textContent)||28);
-  inspectionProgress.querySelector('#mm-inspection-progress-count').textContent=current+' / '+target;
-  inspectionProgress.querySelector('#mm-inspection-progress-fill').style.width=Math.min(100,current/target*100)+'%';
-  const bar=inspectionProgress.querySelector('[role="progressbar"]');
-  bar.setAttribute('aria-valuenow',String(current));bar.setAttribute('aria-valuemax',String(target));
- };
- window.addEventListener('eod:inspection-data-changed',syncInspectionProgress);
- window.addEventListener('eod:recovered',()=>setTimeout(syncInspectionProgress,0));
- syncInspectionProgress();
-}
 if(entry)views['Add Inspection'].append(entry);
 // Row 3: keep the existing live Tire Audits and Tallies controls together below the equipment entry.
 const auditTallies=sidebar?.querySelector('.audit-tally-row');
@@ -59,6 +40,32 @@ if(completed)views.Completed.append(completed);
 if(notes)views.Reports.append(notes);
 if(preview)views.Reports.append(preview);
 const settingsInfo=document.createElement('section');settingsInfo.className='card';settingsInfo.innerHTML='<div class="card-header-styled"><h2>Settings</h2></div><div class="card-body"><p>Choose your terminal from Add Inspection. Terminal settings also determine which inspections are saved and reported.</p><button type="button" id="mm-settings-terminal">OPEN TERMINAL SETTINGS</button></div>';views.Settings.append(settingsInfo);
+// Show the same live daily progress at the top of every workspace page.
+if(dashboardProgress){
+ const progressPanels=[];
+ for(const [name,view] of Object.entries(views)){
+  const panel=document.createElement('section');
+  panel.className='mm-daily-progress mm-workspace-progress';
+  panel.setAttribute('aria-label','Daily inspection progress');
+  panel.innerHTML='<div class="mm-daily-progress-head"><strong>DAILY INSPECTION PROGRESS</strong><span class="mm-workspace-progress-count">0 / 28</span></div><div class="progressbar" role="progressbar" aria-label="Daily inspection progress" aria-valuemin="0" aria-valuemax="28" aria-valuenow="0"><div class="fill"></div></div>';
+  view.prepend(panel);
+  progressPanels.push(panel);
+ }
+ const syncWorkspaceProgress=()=>{
+  const current=Number(document.getElementById('count')?.textContent)||0;
+  const target=Math.max(1,Number(document.getElementById('targetDisplay')?.textContent)||28);
+  for(const panel of progressPanels){
+   panel.querySelector('.mm-workspace-progress-count').textContent=current+' / '+target;
+   panel.querySelector('.fill').style.width=Math.min(100,current/target*100)+'%';
+   const bar=panel.querySelector('[role="progressbar"]');
+   bar.setAttribute('aria-valuenow',String(current));
+   bar.setAttribute('aria-valuemax',String(target));
+  }
+ };
+ window.addEventListener('eod:inspection-data-changed',syncWorkspaceProgress);
+ window.addEventListener('eod:recovered',()=>setTimeout(syncWorkspaceProgress,0));
+ syncWorkspaceProgress();
+}
 app.replaceChildren(dashboard,workspace);
 const names=['Dashboard','Upcoming & Bad Orders','Add Inspection','Completed','Reports','Settings'];const tabs=[...document.querySelectorAll('.mm-side .mm-nav')];let active='Dashboard';
 function show(name){if(!names.includes(name))name='Dashboard';active=name;const home=name==='Dashboard';if(persistentHero){persistentHero.hidden=false;persistentHero.style.display='flex';}dashboard.hidden=!home;workspace.hidden=home;for(const [key,el] of Object.entries(views))el.hidden=home||key!==name;tabs.forEach((b,i)=>{b.classList.toggle('active',names[i]===name);b.setAttribute('aria-current',names[i]===name?'page':'false')});if(!home)document.getElementById('mm-workspace-heading').textContent=name;window.scrollTo({top:0,behavior:'instant'});document.documentElement.scrollTop=0;document.body.scrollTop=0}
