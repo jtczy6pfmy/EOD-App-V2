@@ -21,6 +21,18 @@ if(working){
  dock.setAttribute('aria-label','Selected chassis actions');
  dock.innerHTML='';
  listLayout.append(dock);
+ // Let Inspect scroll naturally until it reaches the bottom of the visible header.
+ const positionInspect=()=>{
+  const hero=document.querySelector('.mm-persistent-hero');
+  const rect=hero?.getBoundingClientRect();
+  const bottom=rect&&rect.bottom>0&&rect.top<window.innerHeight?rect.bottom:0;
+  dock.style.setProperty('--mm-inspect-sticky-top',Math.max(12,Math.round(bottom+12))+'px');
+ };
+ window.addEventListener('scroll',positionInspect,{passive:true});
+ window.addEventListener('resize',positionInspect,{passive:true});
+ window.addEventListener('orientationchange',positionInspect);
+ requestAnimationFrame(positionInspect);
+
  const results=working.querySelector('#outlookSyncResults');
  if(results){
   const relocate=()=>{
