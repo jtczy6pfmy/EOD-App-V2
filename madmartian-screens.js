@@ -19,7 +19,7 @@ if(working){
  const dock=document.createElement('aside');
  dock.className='mm-inspect-dock';
  dock.setAttribute('aria-label','Selected chassis actions');
- dock.innerHTML='<h3>SELECTED CHASSIS</h3><p>Select a chassis from the list to inspect it.</p>';
+ dock.innerHTML='';
  listLayout.append(dock);
  const results=working.querySelector('#outlookSyncResults');
  if(results){
