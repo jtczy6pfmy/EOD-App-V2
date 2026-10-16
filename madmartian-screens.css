@@ -115,3 +115,25 @@ main.app{display:block!important;width:100%!important;max-width:none!important;m
   grid-column:1!important;grid-row:2!important
  }
 }
+
+/* Orientation-first layout: use viewport width, not a fixed desktop canvas. */
+html,body{width:100%!important;max-width:100%!important;min-width:0!important}
+body{box-sizing:border-box!important}
+main.app,#mm-workspace,.mm-workspace-view,.mm-dashboard{box-sizing:border-box!important;max-width:none!important;min-width:0!important}
+main.app{width:100%!important;margin:0!important}
+@media (orientation:landscape) and (min-width:851px){
+ body{padding:12px 12px 24px 237px!important}
+ main.app{width:100%!important;max-width:none!important;margin:0!important}
+ .mm-side{position:fixed!important;left:0!important;top:0!important;bottom:0!important;right:auto!important;width:225px!important;height:auto!important;display:flex!important;flex-direction:column!important}
+ .mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout{display:grid!important;grid-template-columns:minmax(0,1fr) 225px!important;gap:12px!important}
+ .mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-inspect-dock{grid-column:2!important;grid-row:1!important;position:sticky!important;top:12px!important}
+ .mm-workspace-view[data-view="Upcoming & Bad Orders"] #upcomingBadOrders{grid-column:1!important;grid-row:1!important}
+}
+@media (orientation:portrait), (max-width:850px){
+ body{padding:12px 12px 84px!important}
+ main.app{width:100%!important;max-width:none!important;margin:0!important}
+ .mm-side{position:fixed!important;left:0!important;right:0!important;top:auto!important;bottom:0!important;width:100%!important;height:68px!important;display:flex!important;flex-direction:row!important;overflow-x:auto!important}
+ .mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout{display:grid!important;grid-template-columns:minmax(0,1fr)!important}
+ .mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-inspect-dock{grid-column:1!important;grid-row:1!important;position:sticky!important;top:0!important}
+ .mm-workspace-view[data-view="Upcoming & Bad Orders"] #upcomingBadOrders{grid-column:1!important;grid-row:2!important}
+}
