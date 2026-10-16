@@ -5,7 +5,7 @@ body>header{display:none!important}body>.mm-subtitle{display:none!important}main
 @media(max-width:560px){.mm-workspace-view[data-view="Add Inspection"]>.mm-inspection-row-three{grid-template-columns:1fr}}
 
 /* iPad landscape: fill the available area beside the navigation. */
-html,body{width:100%;max-width:100%;overflow-x:hidden}
+html,body{width:100%;max-width:100%}
 main.app{max-width:none!important;width:100%!important;min-width:0!important;margin:0!important}
 .mm-workspace{width:100%!important;max-width:none!important;min-width:0!important;margin:0!important}
 .mm-workspace-view{width:100%;min-width:0}
@@ -15,11 +15,7 @@ main.app{max-width:none!important;width:100%!important;min-width:0!important;mar
 .mm-workspace-view .equipment-entry{background:#161a20!important;border-color:#2b6476!important}
 .mm-workspace-view .equipment-tab{background:#16242e!important;color:#f6f7fa!important;border:1px solid #2b6476!important}
 .mm-workspace-view .equipment-tab[aria-selected="true"]{background:linear-gradient(90deg,#ff9225,#ffb23e)!important;color:#17110b!important;border-color:#ff9d28!important}
-@media (orientation:landscape) and (min-width:1051px){
- body{padding-right:12px!important;padding-left:310px!important}
- .mm-workspace{max-width:none!important}
- .mm-workspace-view[data-view="Add Inspection"]>.mm-inspection-row-three{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
+
 
 /* Add Inspection row 1: matching dashboard progress colors and full-width layout. */
 .mm-workspace-view[data-view="Add Inspection"]>.mm-inspection-progress{width:100%;margin:16px 0;box-sizing:border-box}
@@ -118,5 +114,50 @@ main.app{max-width:none!important;width:100%!important;min-width:0!important;mar
 @media (orientation:portrait), (max-width:850px){
  .mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout>.mm-inspect-dock{
   top:var(--mm-inspect-sticky-top,12px)!important;
+ }
+}
+
+/* V1-style responsive reflow: viewport width controls the layout, not orientation. */
+html,body{min-width:0!important;max-width:100%!important}
+body{box-sizing:border-box!important}
+main.app,.mm-workspace,.mm-workspace-view,.mm-dashboard{
+ box-sizing:border-box!important;
+ width:100%!important;
+ max-width:none!important;
+ min-width:0!important;
+}
+.mm-workspace{margin-inline:0!important}
+.mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout{
+ display:grid!important;
+ grid-template-columns:minmax(0,1fr) max-content!important;
+ gap:clamp(8px,1.2vw,16px)!important;
+}
+.mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout>#upcomingBadOrders{
+ grid-column:1!important;grid-row:1!important;min-width:0!important;
+}
+.mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout>.mm-inspect-dock{
+ grid-column:2!important;grid-row:1!important;
+ position:sticky!important;top:var(--mm-inspect-sticky-top,12px)!important;
+}
+@media(max-width:1000px){
+ .mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout{
+  grid-template-columns:minmax(0,1fr) max-content!important;
+ }
+ .mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout>#upcomingBadOrders{
+  grid-column:1!important;grid-row:1!important;
+ }
+ .mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout>.mm-inspect-dock{
+  grid-column:2!important;grid-row:1!important;
+ }
+}
+@media(max-width:560px){
+ .mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout{
+  grid-template-columns:minmax(0,1fr)!important;
+ }
+ .mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout>.mm-inspect-dock{
+  grid-column:1!important;grid-row:1!important;justify-self:end!important;
+ }
+ .mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout>#upcomingBadOrders{
+  grid-column:1!important;grid-row:2!important;
  }
 }
