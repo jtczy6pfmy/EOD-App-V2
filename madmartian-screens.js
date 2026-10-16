@@ -80,7 +80,26 @@ if(dashboardProgress){
 }
 app.replaceChildren(dashboard,workspace);
 const names=['Dashboard','Upcoming & Bad Orders','Add Inspection','Completed','Reports','Settings'];const tabs=[...document.querySelectorAll('.mm-side .mm-nav')];let active='Dashboard';
-function show(name){if(!names.includes(name))name='Dashboard';active=name;const home=name==='Dashboard';if(persistentHero){persistentHero.hidden=false;persistentHero.style.display='flex';}dashboard.hidden=!home;workspace.hidden=home;for(const [key,el] of Object.entries(views))el.hidden=home||key!==name;tabs.forEach((b,i)=>{b.classList.toggle('active',names[i]===name);b.setAttribute('aria-current',names[i]===name?'page':'false')});if(!home)document.getElementById('mm-workspace-heading').textContent=name;window.scrollTo({top:0,behavior:'instant'});document.documentElement.scrollTop=0;document.body.scrollTop=0}
+const inspectNav=tabs[5];
+if(inspectNav){
+ inspectNav.textContent='INSPECT';
+ inspectNav.setAttribute('aria-label','Inspect selected chassis');
+ inspectNav.classList.add('mm-inspect-nav');
+ inspectNav.addEventListener('click',event=>{
+  event.stopImmediatePropagation();
+  const action=document.querySelector('.mm-inspect-dock .eod-selection-bar button');
+  if(action&&!action.disabled)action.click();
+ },true);
+ const syncInspectNav=()=>{
+  const action=document.querySelector('.mm-inspect-dock .eod-selection-bar button');
+  inspectNav.disabled=!action||action.disabled;
+  inspectNav.title=inspectNav.disabled?'Select a chassis from Upcoming & Bad Orders':'Inspect selected chassis';
+ };
+ new MutationObserver(syncInspectNav).observe(document.querySelector('.mm-orders-layout'),{childList:true,subtree:true,attributes:true,attributeFilter:['disabled']});
+ syncInspectNav();
+}
+
+function show(name){if(!names.includes(name))name='Dashboard';active=name;const home=name==='Dashboard';if(persistentHero){persistentHero.hidden=false;persistentHero.style.display='flex';}dashboard.hidden=!home;workspace.hidden=home;for(const [key,el] of Object.entries(views))el.hidden=home||key!==name;tabs.forEach((b,i)=>{b.classList.toggle('active',i!==5&&names[i]===name);b.setAttribute('aria-current',names[i]===name?'page':'false')});if(!home)document.getElementById('mm-workspace-heading').textContent=name;window.scrollTo({top:0,behavior:'instant'});document.documentElement.scrollTop=0;document.body.scrollTop=0}
 tabs.forEach((b,i)=>b.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();show(names[i])},true));
 document.getElementById('mm-back-dashboard').addEventListener('click',()=>show('Dashboard'));
 document.getElementById('mm-settings-terminal').addEventListener('click',()=>{show('Add Inspection');document.getElementById('terminal')?.focus()});
