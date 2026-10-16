@@ -151,3 +151,37 @@ main.app{width:100%!important;margin:0!important}
  line-height:1.2!important;
  white-space:nowrap!important;
 }
+
+/* Inspect dock hugs its button; no empty text area. */
+.mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout{
+ grid-template-columns:minmax(0,1fr) max-content!important;
+}
+.mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-inspect-dock{
+ width:max-content!important;
+ max-width:100%!important;
+ min-width:0!important;
+ padding:8px!important;
+ justify-self:end!important;
+}
+.mm-inspect-dock .eod-selection-bar{
+ display:flex!important;
+ width:max-content!important;
+ padding:0!important;
+ margin:0!important;
+ gap:0!important;
+}
+.mm-inspect-dock .eod-selection-bar button{
+ margin:0!important;
+ width:max-content!important;
+ min-height:44px!important;
+}
+@media (orientation:landscape) and (min-width:851px){
+ .mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout{
+  grid-template-columns:minmax(0,1fr) max-content!important;
+ }
+}
+@media (orientation:portrait), (max-width:850px){
+ .mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout{
+  grid-template-columns:minmax(0,1fr)!important;
+ }
+}
