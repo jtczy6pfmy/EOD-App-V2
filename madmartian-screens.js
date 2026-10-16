@@ -10,7 +10,27 @@ const workspace=document.createElement('div');workspace.className='mm-screen mm-
 const heading=document.createElement('div');heading.className='mm-workspace-title';heading.innerHTML='<span>OPERATIONS / WORKSPACE</span><h2 id="mm-workspace-heading">Inspections</h2><button type="button" id="mm-back-dashboard">← BACK TO DASHBOARD</button>';workspace.append(heading);
 const views={};for(const name of ['Upcoming & Bad Orders','Add Inspection','Completed','Reports','Settings']){const section=document.createElement('div');section.className='mm-workspace-view';section.dataset.view=name;section.hidden=true;views[name]=section;workspace.append(section)}
 const working=document.getElementById('upcomingBadOrders');const completed=document.getElementById('mm-completed')||document.getElementById('inspectionList')?.closest('section.card');const entry=app.querySelector('section.equipment-entry');const terminal=document.getElementById('terminal')?.closest('section.card');const sidebar=app.querySelector('.sidebar-stack');const notes=document.getElementById('generateEod')?.closest('section.card');const preview=document.getElementById('previewCard');
-if(working)views['Upcoming & Bad Orders'].append(working);
+if(working){
+ views['Upcoming & Bad Orders'].append(working);
+ const listLayout=document.createElement('div');
+ listLayout.className='mm-orders-layout';
+ working.parentNode.insertBefore(listLayout,working);
+ listLayout.append(working);
+ const dock=document.createElement('aside');
+ dock.className='mm-inspect-dock';
+ dock.setAttribute('aria-label','Selected chassis actions');
+ dock.innerHTML='<h3>SELECTED CHASSIS</h3><p>Select a chassis from the list to inspect it.</p>';
+ listLayout.append(dock);
+ const results=working.querySelector('#outlookSyncResults');
+ if(results){
+  const relocate=()=>{
+   const bar=results.querySelector('.eod-selection-bar');
+   if(bar)dock.replaceChildren(bar);
+  };
+  new MutationObserver(relocate).observe(results,{childList:true});
+  relocate();
+ }
+}
 if(sidebar)views['Add Inspection'].append(sidebar);
 // Row 1: mirrored daily progress; dashboard retains the original live progress controls.
 if(dashboardProgress){
