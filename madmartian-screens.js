@@ -88,7 +88,7 @@ if(inspectNav){
  inspectNav.addEventListener('click',event=>{
   event.stopImmediatePropagation();
   const action=document.querySelector('.mm-inspect-dock .eod-selection-bar button');
-  if(action&&!action.disabled)action.click();
+  if(action&&!action.disabled){action.click();return;}\n  show('Upcoming & Bad Orders');
  },true);
  const syncInspectNav=()=>{
   const action=document.querySelector('.mm-inspect-dock .eod-selection-bar button');
