@@ -199,3 +199,47 @@ main.app{width:100%!important;margin:0!important}
   top:var(--mm-inspect-sticky-top,12px)!important;
  }
 }
+
+/* Fluid persistent header: tracks viewport orientation without reload. */
+body>.mm-persistent-hero{
+ box-sizing:border-box!important;
+ width:100%!important;
+ max-width:none!important;
+ min-width:0!important;
+ margin:0 0 14px!important;
+ display:flex!important;
+ flex-wrap:wrap!important;
+ align-items:center!important;
+ gap:clamp(8px,1.5vw,20px)!important;
+ padding:clamp(12px,2vw,24px)!important;
+ background-size:cover!important;
+}
+body>.mm-persistent-hero h1{
+ font-size:clamp(20px,3vw,38px)!important;
+ line-height:1.15!important;
+ overflow-wrap:anywhere;
+}
+body>.mm-persistent-hero .mm-clock{margin-left:auto!important;flex:0 0 auto!important}
+@media (orientation:landscape){
+ body>.mm-persistent-hero{
+  min-height:clamp(110px,15vh,170px)!important;
+  flex-direction:row!important;
+  justify-content:space-between!important;
+  background-position:center 61%!important;
+ }
+}
+@media (orientation:portrait){
+ body>.mm-persistent-hero{
+  min-height:140px!important;
+  flex-direction:row!important;
+  align-content:center!important;
+  background-position:58% center!important;
+ }
+ body>.mm-persistent-hero h1{font-size:clamp(20px,4.2vw,30px)!important}
+ body>.mm-persistent-hero .mm-clock{padding:8px 10px!important}
+ body>.mm-persistent-hero .mm-clock strong{font-size:clamp(17px,3vw,24px)!important}
+}
+@media (max-width:600px){
+ body>.mm-persistent-hero{padding:12px!important;gap:8px!important}
+ body>.mm-persistent-hero .mm-clock{margin-left:0!important}
+}
