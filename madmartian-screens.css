@@ -179,3 +179,20 @@ main.app,.mm-workspace,.mm-workspace-view,.mm-dashboard{
   grid-template-columns:minmax(0,1fr)!important;
  }
 }
+
+/* Always readable Inspect navigation action, including before chassis selection. */
+.mm-side button.mm-nav.mm-inspect-nav,
+.mm-side button.mm-nav.mm-inspect-nav:disabled{
+ display:flex!important;
+ align-items:center!important;
+ justify-content:flex-start!important;
+ visibility:visible!important;
+ opacity:1!important;
+ color:#fff4df!important;
+ background:linear-gradient(90deg,#b95a13,#e88828)!important;
+ border:1px solid #ffad52!important;
+ font-size:15px!important;
+ font-weight:800!important;
+ text-shadow:none!important;
+ min-height:46px!important;
+}
