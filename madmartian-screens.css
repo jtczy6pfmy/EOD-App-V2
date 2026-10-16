@@ -34,3 +34,7 @@ main.app{max-width:none!important;width:100%!important;min-width:0!important;mar
 .mm-inspect-dock .eod-selection-bar button{width:100%!important;min-height:48px}
 .mm-inspect-dock .eod-selection-bar span{overflow-wrap:anywhere}
 @media(max-width:800px){.mm-orders-layout{grid-template-columns:minmax(0,1fr)}.mm-inspect-dock{position:sticky;bottom:0;top:auto;grid-row:1;padding:10px}.mm-inspect-dock .eod-selection-bar{flex-direction:row;flex-wrap:wrap}.mm-inspect-dock .eod-selection-bar button{width:auto!important;flex:1}}
+
+/* Shared workspace progress bar at the top of each page. */
+.mm-workspace-view>.mm-workspace-progress{width:100%;margin:0 0 16px;box-sizing:border-box}
+.mm-workspace-view>.mm-workspace-progress .mm-daily-progress-head span{color:#f6f7fa;font-size:18px;font-weight:800}
