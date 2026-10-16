@@ -80,22 +80,26 @@ if(dashboardProgress){
 }
 app.replaceChildren(dashboard,workspace);
 const names=['Dashboard','Upcoming & Bad Orders','Add Inspection','Completed','Reports','Settings'];const tabs=[...document.querySelectorAll('.mm-side .mm-nav')];let active='Dashboard';
-const inspectNav=tabs[5];
+const inspectNav=tabs.find(b=>b.textContent.trim()==='INSPECT'||b.textContent.trim()==='Settings');
 if(inspectNav){
  inspectNav.textContent='INSPECT';
  inspectNav.setAttribute('aria-label','Inspect selected chassis');
  inspectNav.classList.add('mm-inspect-nav');
+ inspectNav.disabled=false;
  inspectNav.addEventListener('click',event=>{
   event.stopImmediatePropagation();
   const action=document.querySelector('.mm-inspect-dock .eod-selection-bar button');
-  if(action&&!action.disabled){action.click();return;}\n  show('Upcoming & Bad Orders');
+  if(action&&!action.disabled)action.click();
+  else show('Upcoming & Bad Orders');
  },true);
  const syncInspectNav=()=>{
   const action=document.querySelector('.mm-inspect-dock .eod-selection-bar button');
-  inspectNav.disabled=!action||action.disabled;
-  inspectNav.title=inspectNav.disabled?'Select a chassis from Upcoming & Bad Orders':'Inspect selected chassis';
+  inspectNav.disabled=false;
+  inspectNav.textContent='INSPECT';
+  inspectNav.title=action&&!action.disabled?'Inspect selected chassis':'Select a chassis from Upcoming & Bad Orders';
  };
- new MutationObserver(syncInspectNav).observe(document.querySelector('.mm-orders-layout'),{childList:true,subtree:true,attributes:true,attributeFilter:['disabled']});
+ const layout=document.querySelector('.mm-orders-layout');
+ if(layout)new MutationObserver(syncInspectNav).observe(layout,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled']});
  syncInspectNav();
 }
 
