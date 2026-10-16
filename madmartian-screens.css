@@ -161,3 +161,21 @@ main.app,.mm-workspace,.mm-workspace-view,.mm-dashboard{
   grid-column:1!important;grid-row:2!important;
  }
 }
+
+/* Inspect lives in the Settings navigation slot; free the list's right rail. */
+.mm-side .mm-nav.mm-inspect-nav{color:#ffac46!important;border-color:#a96827!important}
+.mm-side .mm-nav.mm-inspect-nav:disabled{opacity:.5!important;cursor:not-allowed!important}
+.mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout{
+ grid-template-columns:minmax(0,1fr)!important;
+}
+.mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout>#upcomingBadOrders{
+ grid-column:1!important;grid-row:1!important;
+}
+.mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout>.mm-inspect-dock{
+ display:none!important;
+}
+@media(max-width:1000px){
+ .mm-workspace-view[data-view="Upcoming & Bad Orders"] .mm-orders-layout{
+  grid-template-columns:minmax(0,1fr)!important;
+ }
+}
