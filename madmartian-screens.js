@@ -79,7 +79,7 @@ if(dashboardProgress){
  syncWorkspaceProgress();
 }
 app.replaceChildren(dashboard,workspace);
-const names=['Dashboard','Upcoming & Bad Orders','Add Inspection','Completed','Reports','Settings'];const tabs=[...document.querySelectorAll('.mm-side .mm-nav')];let active='Dashboard';
+const names=['Dashboard','Upcoming & Bad Orders','Add Inspection','Completed','Reports','Settings'];const tabs=[...document.querySelectorAll('.mm-side .mm-nav:not(.mm-imrs-nav)')];let active='Dashboard';
 const inspectNav=tabs.find(b=>b.textContent.trim()==='INSPECT'||b.textContent.trim()==='Settings');
 if(inspectNav){
  inspectNav.textContent='INSPECT';
