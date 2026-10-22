@@ -10,6 +10,8 @@ function completed(){try{return new Set(JSON.parse(localStorage.getItem(COMPLETE
 function markCompleted(row){const ids=completed();ids.add(assetKey(row));localStorage.setItem(COMPLETED_KEY,JSON.stringify([...ids]));render(load())}
 const outstanding=(row,kind)=>Boolean(assetKey(row))&&(kind==="bad"||allowedChassis(row))&&!completed().has(assetKey(row));
 function uniqueOutstanding(rows,kind){const seen=new Set();return (rows||[]).filter(row=>{if(!outstanding(row,kind))return false;const id=assetKey(row);if(seen.has(id))return false;seen.add(id);return true})}
+// Validate/deduplicate Upcoming only; Bad Orders sync independently without Upcoming validation.
+const prepareSyncedRows=(rows,kind)=>kind==='upcoming'?uniqueOutstanding(rows,'upcoming'):(Array.isArray(rows)?rows:[]).filter(row=>row&&typeof row==='object');
 const HEADERS=["Lot Loc","Eq Init Nr","Mate Init Nr","Hold List","Hold Category","Dwell DD HH"];
 let sortColumn="Lot Loc",sortDirection=1,selectedLots=null,reportView="all",selectedAsset="",holdListFilter="";
 window.addEventListener("eod:report-view",event=>{reportView=["all","upcoming","bad"].includes(event.detail)?event.detail:"all";holdListFilter="";selectedLots=null;selectedAsset="";render(load())});
@@ -120,7 +122,7 @@ fileInput.addEventListener("change",async()=>{
   const unknown=imported.filter(f=>!f.kind);
   if(unknown.length)throw new Error("Unrecognized spreadsheet columns: "+unknown.map(f=>f.name).join(", "));
   const existing=load()||{bad:[],upcoming:[]};
-  for(const file of imported)existing[file.kind]=uniqueOutstanding(file.rows.map(r=>normalize(r,file.kind)).filter(Boolean));
+  for(const file of imported)existing[file.kind]=prepareSyncedRows(file.rows.map(r=>normalize(r,file.kind)).filter(Boolean),file.kind);
   existing.updated=Date.now();
   localStorage.setItem(KEY,JSON.stringify(existing));
   render(existing);window.dispatchEvent(new Event("eod:reports-updated"));
@@ -137,7 +139,7 @@ async function cloudRefresh(ask=false){
   const payload=await response.json(),reports=payload.reports||[];
   if(!reports.length){status.textContent="Cloud connected · Waiting for emailed reports";return}
   const data=load()||{upcoming:[],bad:[]};
-  for(const report of reports)if(report.report_type==="bad"||report.report_type==="upcoming")data[report.report_type]=uniqueOutstanding(report.rows,report.report_type);
+  for(const report of reports)if(report.report_type==="bad"||report.report_type==="upcoming")data[report.report_type]=prepareSyncedRows(report.rows,report.report_type);
   data.updated=Date.now();localStorage.setItem(KEY,JSON.stringify(data));render(data);window.dispatchEvent(new Event("eod:reports-updated"));
   status.textContent="Updated "+new Date().toLocaleString();
  }catch(error){status.textContent=error.message}
