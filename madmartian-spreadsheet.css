@@ -152,3 +152,8 @@
 #outlookSyncResults .eod-selection-bar{background:#15222b!important;border:1px solid #347184!important;color:#f6f7fa!important}
 #outlookSyncResults .eod-selection-bar button{background:#ff9d28!important;color:#17110b!important}
 #outlookSyncResults .eod-selection-bar button:last-child{background:#1b2b35!important;color:#d8e6ee!important;border:1px solid #347184!important}
+
+/* Increase order-list text two steps: 16px -> 20px. */
+#upcomingBadOrders #outlookSyncResults table th,
+#upcomingBadOrders #outlookSyncResults table th button,
+#upcomingBadOrders #outlookSyncResults table td{font-size:20px!important;line-height:1.4!important}
