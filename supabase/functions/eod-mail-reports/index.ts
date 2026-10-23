@@ -15,7 +15,7 @@ function convert(row:Record<string,unknown>,kind:string){
  if(!/^(AIMZ|NSPZ|NSFZ)/i.test(out["Eq Init Nr"]))return null;
  if(kind==="good"){
   const hours=val(row,"Dwell Hr"),dwell=out["Dwell DD HH"].match(/(\d+)\s*d/i);
-  const oldEnough=hours!==""?Number(hours)>=19*24:Boolean(dwell&&Number(dwell[1])>=19);
+  const oldEnough=hours!==""?Number(hours.replace(/,/g,""))>=19*24:Boolean(dwell&&Number(dwell[1])>=19);
   if(!/^(NSPZ|NSFZ)/i.test(out["Eq Init Nr"])||!oldEnough)return null;
   if(val(row,"Eq BO").toUpperCase()==="YES")return null;
  }
