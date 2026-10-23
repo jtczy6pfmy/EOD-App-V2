@@ -8,10 +8,10 @@ if(dashboardProgress){const board=dashboard.querySelector('.mm-board');if(board)
 const dashboardBottom=app.querySelector('.mm-bottom');if(dashboardBottom)dashboard.append(dashboardBottom);
 const workspace=document.createElement('div');workspace.className='mm-screen mm-workspace';workspace.id='mm-workspace';
 const heading=document.createElement('div');heading.className='mm-workspace-title';heading.innerHTML='<span>OPERATIONS / WORKSPACE</span><h2 id="mm-workspace-heading">Inspections</h2><button type="button" id="mm-back-dashboard">← BACK TO DASHBOARD</button>';workspace.append(heading);const buildTag=document.createElement('small');buildTag.textContent='BUILD 2026.10.16-R2';buildTag.className='mm-build-tag';buildTag.style.cssText='display:inline-block;padding:5px 9px;border:1px solid #26d9ec;border-radius:7px;color:#26d9ec;font-size:11px;font-weight:800;letter-spacing:.5px';heading.append(buildTag);
-const views={};for(const name of ['Upcoming & Good/Bad Orders','Add Inspection','Completed','Reports','Settings']){const section=document.createElement('div');section.className='mm-workspace-view';section.dataset.view=name;section.hidden=true;views[name]=section;workspace.append(section)}
+const views={};for(const name of ['Upcoming & Bad/Good Order','Add Inspection','Completed','Reports','Settings']){const section=document.createElement('div');section.className='mm-workspace-view';section.dataset.view=name;section.hidden=true;views[name]=section;workspace.append(section)}
 const working=document.getElementById('upcomingBadOrders');const completed=document.getElementById('mm-completed')||document.getElementById('inspectionList')?.closest('section.card');const entry=app.querySelector('section.equipment-entry');const terminal=document.getElementById('terminal')?.closest('section.card');const sidebar=app.querySelector('.sidebar-stack');const notes=document.getElementById('generateEod')?.closest('section.card');const preview=document.getElementById('previewCard');
 if(working){
- views['Upcoming & Good/Bad Orders'].append(working);
+ views['Upcoming & Bad/Good Order'].append(working);
  const listLayout=document.createElement('div');
  listLayout.className='mm-orders-layout';
  working.parentNode.insertBefore(listLayout,working);
@@ -79,7 +79,7 @@ if(dashboardProgress){
  syncWorkspaceProgress();
 }
 app.replaceChildren(dashboard,workspace);
-const names=['Dashboard','Upcoming & Good/Bad Orders','Add Inspection','Completed','Reports','Settings'];const tabs=[...document.querySelectorAll('.mm-side .mm-nav:not(.mm-imrs-nav)')];let active='Dashboard';
+const names=['Dashboard','Upcoming & Bad/Good Order','Add Inspection','Completed','Reports','Settings'];const tabs=[...document.querySelectorAll('.mm-side .mm-nav:not(.mm-imrs-nav)')];let active='Dashboard';
 const inspectNav=tabs.find(b=>b.textContent.trim()==='INSPECT'||b.textContent.trim()==='Settings');
 if(inspectNav){
  inspectNav.textContent='INSPECT';
@@ -90,13 +90,13 @@ if(inspectNav){
   event.stopImmediatePropagation();
   const action=document.querySelector('.mm-inspect-dock .eod-selection-bar button');
   if(action&&!action.disabled)action.click();
-  else show('Upcoming & Good/Bad Orders');
+  else show('Upcoming & Bad/Good Order');
  },true);
  const syncInspectNav=()=>{
   const action=document.querySelector('.mm-inspect-dock .eod-selection-bar button');
   inspectNav.disabled=false;
   inspectNav.textContent='INSPECT';
-  inspectNav.title=action&&!action.disabled?'Inspect selected chassis':'Select a chassis from Upcoming & Good/Bad Orders';
+  inspectNav.title=action&&!action.disabled?'Inspect selected chassis':'Select a chassis from Upcoming & Bad/Good Order';
  };
  const layout=document.querySelector('.mm-orders-layout');
  if(layout)new MutationObserver(syncInspectNav).observe(layout,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled']});
@@ -107,8 +107,8 @@ function show(name){if(!names.includes(name))name='Dashboard';active=name;const 
 tabs.forEach((b,i)=>{if(b===inspectNav)return;b.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();show(names[i])},true)});
 document.getElementById('mm-back-dashboard').addEventListener('click',()=>show('Dashboard'));
 document.getElementById('mm-settings-terminal').addEventListener('click',()=>{show('Add Inspection');document.getElementById('terminal')?.focus()});
-document.querySelectorAll('.mm-board [data-go]').forEach(button=>button.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();show('Upcoming & Good/Bad Orders');const view=button.dataset.go==='bad'?'bad':'upcoming';window.dispatchEvent(new CustomEvent('eod:report-view',{detail:view}))},true));
-document.querySelectorAll('.mm-bottom [data-action]').forEach(button=>button.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();const action=button.dataset.action;if(action==='inspection')show('Add Inspection');else if(action==='bad'){show('Upcoming & Good/Bad Orders');window.dispatchEvent(new CustomEvent('eod:report-view',{detail:'bad'}))}else if(action==='report')show('Reports');else show('Completed')},true));
-window.addEventListener('eod:inspection-removed',()=>{show('Upcoming & Good/Bad Orders');window.dispatchEvent(new Event('eod:show-bocz'));});
+document.querySelectorAll('.mm-board [data-go]').forEach(button=>button.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();show('Upcoming & Bad/Good Order');const view=button.dataset.go==='bad'?'bad':'upcoming';window.dispatchEvent(new CustomEvent('eod:report-view',{detail:view}))},true));
+document.querySelectorAll('.mm-bottom [data-action]').forEach(button=>button.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();const action=button.dataset.action;if(action==='inspection')show('Add Inspection');else if(action==='bad'){show('Upcoming & Bad/Good Order');window.dispatchEvent(new CustomEvent('eod:report-view',{detail:'bad'}))}else if(action==='report')show('Reports');else show('Completed')},true));
+window.addEventListener('eod:inspection-removed',()=>{show('Upcoming & Bad/Good Order');window.dispatchEvent(new Event('eod:show-bocz'));});
 window.addEventListener('eod:inspect-selected',event=>{const asset=String(event.detail?.asset||'').toUpperCase().replace(/[^A-Z0-9]/g,'');const match=asset.match(/^([A-Z]{4})([0-9]{5,6})$/);if(!match)return;show('Add Inspection');document.getElementById('tab-chassis')?.click();const prefix=document.getElementById('prefix');const number=document.getElementById('number');if(!prefix||!number)return;const option=[...prefix.options].find(x=>x.value===match[1]);if(option){prefix.value=match[1];prefix.dispatchEvent(new Event('change',{bubbles:true}))}else{const opt=new Option(match[1],match[1]);prefix.append(opt);prefix.value=match[1];prefix.dispatchEvent(new Event('change',{bubbles:true}))}number.value=match[2];number.dispatchEvent(new Event('input',{bubbles:true}));if(document.activeElement instanceof HTMLElement)document.activeElement.blur();requestAnimationFrame(()=>{document.getElementById("mm-workspace-heading")?.scrollIntoView({behavior:"smooth",block:"start"});});});show('Dashboard');
 })();
