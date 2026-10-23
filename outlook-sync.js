@@ -116,7 +116,7 @@ function render(data){
  status.textContent="Updated "+new Date(data.updated).toLocaleString()+(rows.length>500?" · First 500 shown":"");
 }
 function load(){try{return JSON.parse(localStorage.getItem(KEY)||"null")}catch{return null}}
-button.addEventListener("click",()=>render(load()));
+// Sync button always requests the current cloud reports; cached data renders on startup.
 fileInput.addEventListener("change",async()=>{
  if(!fileInput.files.length)return;
  if(!window.XLSX){status.textContent="Excel reader unavailable. Check your internet connection.";return}
@@ -137,20 +137,22 @@ fileInput.addEventListener("change",async()=>{
 
 const endpoint="https://tjhsrydhkigvhlllnstm.supabase.co/functions/v1/eod-mail-reports";
 async function cloudRefresh(ask=false){
- 
+ status.textContent=ask?"Syncing latest reports…":"Checking latest reports…";
  try{
   const response=await fetch(endpoint,{cache:"no-store"});
   if(!response.ok){throw Error("Cloud reports unavailable ("+response.status+")")}
   const payload=await response.json(),reports=payload.reports||[];
-  if(!reports.length){status.textContent="Cloud connected · Waiting for emailed reports";return}
+  if(!reports.length){status.textContent="Cloud connected · No imported reports yet";return}
   const data=load()||{upcoming:[],good:[],bad:[]};
   for(const report of reports)if(report.report_type==="bad"||report.report_type==="good"||report.report_type==="upcoming")data[report.report_type]=prepareSyncedRows(report.rows,report.report_type);
   data.updated=Date.now();localStorage.setItem(KEY,JSON.stringify(data));render(data);window.dispatchEvent(new Event("eod:reports-updated"));
-  status.textContent="Updated "+new Date().toLocaleString();
+  status.textContent="Synced from cloud "+new Date().toLocaleString()+" · "+reports.map(r=>r.report_type+": "+new Date(r.updated_at).toLocaleString()).join(" · ");
  }catch(error){status.textContent=error.message}
 }
-button.addEventListener("click",()=>cloudRefresh(false));
+button.addEventListener("click",()=>cloudRefresh(true));
 cloudRefresh(false);
+window.addEventListener("pageshow",event=>{if(event.persisted)cloudRefresh(false)});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")cloudRefresh(false)});
 
 // The existing Add Inspection handler clears the chassis number only after a successful save.
 // Observe that result without modifying index.html.
