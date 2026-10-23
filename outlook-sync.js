@@ -8,7 +8,7 @@ const COMPLETED_KEY="eod_completed_assets_v1";
 const assetKey=row=>String(row["Eq Init Nr"]||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
 function completed(){try{return new Set(JSON.parse(localStorage.getItem(COMPLETED_KEY)||"[]"))}catch{return new Set()}}
 function markCompleted(row){const ids=completed();ids.add(assetKey(row));localStorage.setItem(COMPLETED_KEY,JSON.stringify([...ids]));render(load())}
-const goodEligible=row=>/^(?:NSPZ|NSFZ)/i.test(String(row["Eq Init Nr"]||""))&&Number((String(row["Dwell DD HH"]||"").match(/(\d+)\s*d/i)||[])[1])>=19;
+const goodEligible=row=>/^(?:AIMZ|NSPZ|NSFZ)/i.test(String(row["Eq Init Nr"]||""))&&Number((String(row["Dwell DD HH"]||"").match(/(\d+)\s*d/i)||[])[1])>=19;
 const outstanding=(row,kind)=>(kind!=="good"||goodEligible(row))&&Boolean(assetKey(row))&&(kind==="bad"||allowedChassis(row))&&!completed().has(assetKey(row));
 function uniqueOutstanding(rows,kind){const seen=new Set();return (rows||[]).filter(row=>{if(!outstanding(row,kind))return false;const id=assetKey(row);if(seen.has(id))return false;seen.add(id);return true})}
 // Validate/deduplicate Upcoming only; Bad Orders sync independently without Upcoming validation.
@@ -50,7 +50,7 @@ function normalize(row,kind){
  }
  const chassis=out["Eq Init Nr"],equipment=out["Mate Init Nr"];
  if(!allowedChassis(out))return null;
- if(/^(?:NSPZ|NSFZ)(?:\b|(?=\d))/i.test(equipment)){
+ if(/^(?:AIMZ|NSPZ|NSFZ)(?:\b|(?=\d))/i.test(equipment)){
   out["Eq Init Nr"]=equipment;
   out["Mate Init Nr"]="";
  }

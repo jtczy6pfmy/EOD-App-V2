@@ -11,12 +11,12 @@ function convert(row:Record<string,unknown>,kind:string){
  if(kind==="bad"||kind==="good"){for(const k of fields)out[k]=val(row,k);out["Hold List"]=val(row,"Hold List")||val(row,"Holds")}
  else {out["Lot Loc"]=val(row,"LOT LOC");out["Eq Init Nr"]=val(row,"CHASSIS");out["Mate Init Nr"]=val(row,"EQUIPMENT");out["Hold List"]="FHWA";out["Hold Category"]=[val(row,"FHWA STATUS"),val(row,"FHWA Date")].filter(Boolean).join(" · ");out["Dwell DD HH"]=val(row,"DWELL TIME")}
  
- if(/^(NSPZ|NSFZ)/i.test(out["Mate Init Nr"])){out["Eq Init Nr"]=out["Mate Init Nr"];out["Mate Init Nr"]=""}
+ if(/^(AIMZ|NSPZ|NSFZ)/i.test(out["Mate Init Nr"])){out["Eq Init Nr"]=out["Mate Init Nr"];out["Mate Init Nr"]=""}
  if(!/^(AIMZ|NSPZ|NSFZ)/i.test(out["Eq Init Nr"]))return null;
  if(kind==="good"){
   const hours=val(row,"Dwell Hr"),dwell=out["Dwell DD HH"].match(/(\d+)\s*d/i);
   const oldEnough=hours!==""?Number(hours.replace(/,/g,""))>=19*24:Boolean(dwell&&Number(dwell[1])>=19);
-  if(!/^(NSPZ|NSFZ)/i.test(out["Eq Init Nr"])||!oldEnough)return null;
+  if(!/^(AIMZ|NSPZ|NSFZ)/i.test(out["Eq Init Nr"])||!oldEnough)return null;
   if(val(row,"Eq BO").toUpperCase()==="YES")return null;
  }
  return out;
