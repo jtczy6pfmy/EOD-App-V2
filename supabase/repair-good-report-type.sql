@@ -1,0 +1,1 @@
+begin; alter table public.eod_mail_reports drop constraint eod_mail_reports_report_type_check; alter table public.eod_mail_reports add constraint eod_mail_reports_report_type_check check (report_type in ('upcoming','bad','good')); commit;

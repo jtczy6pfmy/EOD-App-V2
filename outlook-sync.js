@@ -8,7 +8,8 @@ const COMPLETED_KEY="eod_completed_assets_v1";
 const assetKey=row=>String(row["Eq Init Nr"]||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
 function completed(){try{return new Set(JSON.parse(localStorage.getItem(COMPLETED_KEY)||"[]"))}catch{return new Set()}}
 function markCompleted(row){const ids=completed();ids.add(assetKey(row));localStorage.setItem(COMPLETED_KEY,JSON.stringify([...ids]));render(load())}
-const outstanding=(row,kind)=>Boolean(assetKey(row))&&(kind==="bad"||allowedChassis(row))&&!completed().has(assetKey(row));
+const goodEligible=row=>/^(?:NSPZ|NSFZ)/i.test(String(row["Eq Init Nr"]||""))&&Number((String(row["Dwell DD HH"]||"").match(/(\d+)\s*d/i)||[])[1])>=19;
+const outstanding=(row,kind)=>(kind!=="good"||goodEligible(row))&&Boolean(assetKey(row))&&(kind==="bad"||allowedChassis(row))&&!completed().has(assetKey(row));
 function uniqueOutstanding(rows,kind){const seen=new Set();return (rows||[]).filter(row=>{if(!outstanding(row,kind))return false;const id=assetKey(row);if(seen.has(id))return false;seen.add(id);return true})}
 // Validate/deduplicate Upcoming only; Bad Orders sync independently without Upcoming validation.
 const prepareSyncedRows=(rows,kind)=>kind==='upcoming'?uniqueOutstanding(rows,'upcoming'):(Array.isArray(rows)?rows:[]).filter(row=>row&&typeof row==='object');
@@ -38,7 +39,7 @@ function get(row,...names){
 }
 function normalize(row,kind){
  const out={};
- if(kind==="bad"||kind==="good"){for(const h of HEADERS)out[h]=get(row,h)}
+ if(kind==="bad"||kind==="good"){for(const h of HEADERS)out[h]=get(row,h);out["Hold List"]=get(row,"Hold List","Holds")}
  else{
   out["Lot Loc"]=get(row,"LOT LOC");
   out["Eq Init Nr"]=get(row,"CHASSIS");
@@ -86,13 +87,14 @@ function render(data){
  const lots=[...new Set(allRows.map(row=>String(row["Lot Loc"]||"").trim()))].sort(sorter.compare);
  const rows=allRows.filter(row=>selectedLots===null||selectedLots.has(String(row["Lot Loc"]||"").trim())).sort((a,b)=>sortDirection*sorter.compare(String(a[sortColumn]??""),String(b[sortColumn]??"")));
  if(selectedAsset&&!allRows.some(row=>assetKey(row)===selectedAsset))selectedAsset="";
+ const displayHeaders=reportView==="good"?["Eq Init Nr","Lot Loc","Hold List","Dwell DD HH"]:HEADERS;
  const viewTabs=document.createElement("div");viewTabs.setAttribute("role","group");viewTabs.setAttribute("aria-label","Order list");viewTabs.style.cssText="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px";for(const [key,label] of [["all","All"],["upcoming","Upcoming"],["good","Good Orders"],["bad","Bad Orders"]]){const tab=document.createElement("button");tab.type="button";tab.textContent=label;tab.setAttribute("aria-pressed",String(reportView===key));tab.style.cssText="width:auto;padding:8px 14px;border-radius:8px;"+(reportView===key?"background:#e87518;color:#fff;":"");tab.addEventListener("click",()=>{reportView=key;selectedLots=null;selectedAsset="";holdListFilter="";render(load())});viewTabs.append(tab)}results.append(viewTabs);
  const summary=document.createElement("p");summary.textContent=upcoming.length+" upcoming inspections · "+good.length+" good orders · "+bad.length+" bad orders · "+rows.length+" shown"+(reportView==="all"?"":" · "+(reportView==="bad"?"Bad orders":reportView==="good"?"Good orders":"Upcoming")+" view"+(holdListFilter?" · Hold List: "+holdListFilter:""));results.append(summary);
  const selectionBar=document.createElement("div");selectionBar.className="eod-selection-bar";selectionBar.setAttribute("role","status");const selectionLabel=document.createElement("span");selectionLabel.textContent=selectedAsset?"Selected chassis: "+selectedAsset:"Tap any row to select a chassis for inspection";const inspectSelected=document.createElement("button");inspectSelected.type="button";inspectSelected.textContent="INSPECT";inspectSelected.disabled=!selectedAsset;inspectSelected.addEventListener("click",()=>{if(!selectedAsset)return;window.dispatchEvent(new CustomEvent("eod:inspect-selected",{detail:{asset:selectedAsset}}))});const clearSelection=document.createElement("button");clearSelection.type="button";clearSelection.textContent="CLEAR";clearSelection.disabled=!selectedAsset;clearSelection.addEventListener("click",()=>{selectedAsset="";render(load())});selectionBar.append(inspectSelected);results.append(selectionBar);
  const wrap=document.createElement("div");wrap.style.overflowX="auto";
  const table=document.createElement("table");table.style.cssText="width:100%;border-collapse:collapse;font-size:1rem";
  const head=document.createElement("tr");
- for(const h of HEADERS){const th=document.createElement("th");const sortButton=document.createElement("button");sortButton.type="button";sortButton.textContent=h+(sortColumn===h?(sortDirection===1?" ▲":" ▼"):" ⇅");sortButton.setAttribute("aria-label","Sort by "+h);sortButton.setAttribute("aria-pressed",String(sortColumn===h));sortButton.style.cssText="width:auto;background:transparent;color:inherit;border:0;padding:7px 4px;font:inherit;font-weight:700;cursor:pointer;white-space:nowrap";sortButton.addEventListener("click",()=>{if(sortColumn===h)sortDirection*=-1;else{sortColumn=h;sortDirection=1}render(load())});th.append(sortButton);th.style.cssText="text-align:left;padding:2px;border-bottom:1px solid #cbd5e1";if(h==="Lot Loc"){
+ for(const h of displayHeaders){const th=document.createElement("th");const sortButton=document.createElement("button");sortButton.type="button";sortButton.textContent=(reportView==="good"&&h==="Hold List"?"Holds":h)+(sortColumn===h?(sortDirection===1?" ▲":" ▼"):" ⇅");sortButton.setAttribute("aria-label","Sort by "+h);sortButton.setAttribute("aria-pressed",String(sortColumn===h));sortButton.style.cssText="width:auto;background:transparent;color:inherit;border:0;padding:7px 4px;font:inherit;font-weight:700;cursor:pointer;white-space:nowrap";sortButton.addEventListener("click",()=>{if(sortColumn===h)sortDirection*=-1;else{sortColumn=h;sortDirection=1}render(load())});th.append(sortButton);th.style.cssText="text-align:left;padding:2px;border-bottom:1px solid #cbd5e1";if(h==="Lot Loc"){
   const filterButton=document.createElement("button");filterButton.type="button";filterButton.textContent=selectedLots===null?" ▾":" ▾●";filterButton.setAttribute("aria-label","Filter Lot Loc like Excel");filterButton.style.cssText="width:auto;background:transparent;color:inherit;border:0;padding:6px;cursor:pointer;font-size:1rem";
   filterButton.addEventListener("click",()=>{
    const existing=document.getElementById("eodLotFilterPanel");if(existing){existing.remove();return}
@@ -111,9 +113,9 @@ function render(data){
  }head.append(th)}
  const thead=document.createElement("thead");thead.append(head);table.append(thead);
  const tbody=document.createElement("tbody");
- for(const row of rows.slice(0,500)){const tr=document.createElement("tr");const id=assetKey(row);tr.className="eod-data-row"+(id===selectedAsset?" eod-row-selected":"");tr.tabIndex=0;tr.setAttribute("aria-selected",String(id===selectedAsset));const select=()=>{selectedAsset=selectedAsset===id?"":id;render(load())};tr.addEventListener("click",select);tr.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();select()}});for(const h of HEADERS){const td=document.createElement("td");td.textContent=row[h]||"";td.style.cssText="padding:7px;border-bottom:1px solid #e2e8f0";tr.append(td)}tbody.append(tr)}
+ for(const row of rows){const tr=document.createElement("tr");const id=assetKey(row);tr.className="eod-data-row"+(id===selectedAsset?" eod-row-selected":"");tr.tabIndex=0;tr.setAttribute("aria-selected",String(id===selectedAsset));const select=()=>{selectedAsset=selectedAsset===id?"":id;render(load())};tr.addEventListener("click",select);tr.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();select()}});for(const h of displayHeaders){const td=document.createElement("td");td.textContent=row[h]||"";td.style.cssText="padding:7px;border-bottom:1px solid #e2e8f0";tr.append(td)}tbody.append(tr)}
  table.append(tbody);wrap.append(table);results.append(wrap);
- status.textContent="Updated "+new Date(data.updated).toLocaleString()+(rows.length>500?" · First 500 shown":"");
+ status.textContent="Updated "+new Date(data.updated).toLocaleString();
 }
 function load(){try{return JSON.parse(localStorage.getItem(KEY)||"null")}catch{return null}}
 // Sync button always requests the current cloud reports; cached data renders on startup.
@@ -144,7 +146,7 @@ async function cloudRefresh(ask=false){
   const payload=await response.json(),reports=payload.reports||[];
   if(!reports.length){status.textContent="Cloud connected · No imported reports yet";return}
   const data=load()||{upcoming:[],good:[],bad:[]};
-  for(const report of reports)if(report.report_type==="bad"||report.report_type==="good"||report.report_type==="upcoming")data[report.report_type]=prepareSyncedRows(report.rows,report.report_type);
+  for(const report of reports)if(report.report_type==="bad"||report.report_type==="good"||report.report_type==="upcoming"){if(Array.isArray(report.rows)&&report.rows.length)data[report.report_type]=prepareSyncedRows(report.rows,report.report_type);}
   data.updated=Date.now();localStorage.setItem(KEY,JSON.stringify(data));render(data);window.dispatchEvent(new Event("eod:reports-updated"));
   status.textContent="Synced from cloud "+new Date().toLocaleString()+" · "+reports.map(r=>r.report_type+": "+new Date(r.updated_at).toLocaleString()).join(" · ");
  }catch(error){status.textContent=error.message}
