@@ -20,11 +20,12 @@ const sorter=new Intl.Collator(undefined,{numeric:true,sensitivity:"base"});
 const allowedChassis=row=>/^(?:AIMZ|NSPZ|NSFZ)/i.test(String(row["Eq Init Nr"]||"").trim());
 const fileInput=document.createElement("input");
 fileInput.type="file";fileInput.accept=".xlsx,.xls";fileInput.multiple=true;fileInput.hidden=true;
+const importType=document.createElement("select");importType.setAttribute("aria-label","Excel report type");importType.style.cssText="width:auto;margin-left:8px;padding:8px;background:#fff;color:#001338";for(const [value,label] of [["auto","Detect report"],["good","Good Orders"],["bad","Bad Orders"],["upcoming","Upcoming"]]){const option=document.createElement("option");option.value=value;option.textContent=label;importType.append(option)}
 const importButton=document.createElement("button");
 importButton.type="button";importButton.textContent="Import Excel";
 importButton.style.cssText="width:auto;background:#ffc107;color:#001338;padding:8px 12px;margin-left:8px";
-button.after(fileInput);
-button.setAttribute("aria-label","Refresh saved Upcoming and Bad Orders");
+button.after(fileInput,importType);
+button.setAttribute("aria-label","Refresh saved Upcoming, Good and Bad Orders");
 
 function get(row,...names){
  const entries=Object.entries(row);
@@ -122,6 +123,7 @@ fileInput.addEventListener("change",async()=>{
  importButton.disabled=true;status.textContent="Reading Excel files…";
  try{
   const imported=await Promise.all([...fileInput.files].map(readFile));
+  if(importType.value!=="auto")for(const file of imported)file.kind=importType.value;
   const unknown=imported.filter(f=>!f.kind);
   if(unknown.length)throw new Error("Unrecognized spreadsheet columns: "+unknown.map(f=>f.name).join(", "));
   const existing=load()||{bad:[],good:[],upcoming:[]};
