@@ -129,7 +129,7 @@ fileInput.addEventListener("change",async()=>{
   const unknown=imported.filter(f=>!f.kind);
   if(unknown.length)throw new Error("Unrecognized spreadsheet columns: "+unknown.map(f=>f.name).join(", "));
   const existing=load()||{bad:[],good:[],upcoming:[]};
-  for(const file of imported)existing[file.kind]=prepareSyncedRows(file.rows.map(r=>normalize(r,file.kind)).filter(Boolean),file.kind);
+  for(const file of imported.filter(file=>file.kind!=="good"))existing[file.kind]=prepareSyncedRows(file.rows.map(r=>normalize(r,file.kind)).filter(Boolean),file.kind);
   existing.updated=Date.now();
   localStorage.setItem(KEY,JSON.stringify(existing));
   render(existing);window.dispatchEvent(new Event("eod:reports-updated"));
@@ -146,7 +146,7 @@ async function cloudRefresh(ask=false){
   const payload=await response.json(),reports=payload.reports||[];
   if(!reports.length){status.textContent="Cloud connected · No imported reports yet";return}
   const data=load()||{upcoming:[],good:[],bad:[]};
-  for(const report of reports)if(report.report_type==="bad"||report.report_type==="good"||report.report_type==="upcoming"){if(Array.isArray(report.rows)&&report.rows.length)data[report.report_type]=prepareSyncedRows(report.rows,report.report_type);}
+  for(const report of reports)if(report.report_type==="bad"||report.report_type==="upcoming"){if(Array.isArray(report.rows)&&report.rows.length)data[report.report_type]=prepareSyncedRows(report.rows,report.report_type);}
   data.updated=Date.now();localStorage.setItem(KEY,JSON.stringify(data));render(data);window.dispatchEvent(new Event("eod:reports-updated"));
   status.textContent="Synced from cloud "+new Date().toLocaleString()+" · "+reports.map(r=>r.report_type+": "+new Date(r.updated_at).toLocaleString()).join(" · ");
  }catch(error){status.textContent=error.message}
