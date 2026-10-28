@@ -15,13 +15,13 @@ function uniqueOutstanding(rows,kind){const seen=new Set();return (rows||[]).fil
 const prepareSyncedRows=(rows,kind)=>kind==='upcoming'?uniqueOutstanding(rows,'upcoming'):(Array.isArray(rows)?rows:[]).filter(row=>row&&typeof row==='object');
 const HEADERS=["Lot Loc","Eq Init Nr","Mate Init Nr","Hold List","Hold Category","Dwell DD HH"];
 let sortColumn="Lot Loc",sortDirection=1,selectedLots=null,reportView="all",selectedAsset="",holdListFilter="";
-window.addEventListener("eod:report-view",event=>{reportView=["all","upcoming","good","bad"].includes(event.detail)?event.detail:"all";holdListFilter="";selectedLots=null;selectedAsset="";render(load())});
+window.addEventListener("eod:report-view",event=>{reportView=["all","upcoming","bad"].includes(event.detail)?event.detail:"all";holdListFilter="";selectedLots=null;selectedAsset="";render(load())});
 window.addEventListener("eod:show-bocz",()=>{reportView="bad";holdListFilter="";selectedLots=null;selectedAsset="";render(load())});
 const sorter=new Intl.Collator(undefined,{numeric:true,sensitivity:"base"});
 const allowedChassis=row=>/^(?:AIMZ|NSPZ|NSFZ)/i.test(String(row["Eq Init Nr"]||"").trim());
 const fileInput=document.createElement("input");
 fileInput.type="file";fileInput.accept=".xlsx,.xls";fileInput.multiple=true;fileInput.hidden=true;
-const importType=document.createElement("select");importType.setAttribute("aria-label","Excel report type");importType.style.cssText="width:auto;margin-left:8px;padding:8px;background:#fff;color:#001338";for(const [value,label] of [["auto","Detect report"],["good","Good Orders"],["bad","Bad Orders"],["upcoming","Upcoming"]]){const option=document.createElement("option");option.value=value;option.textContent=label;importType.append(option)}
+const importType=document.createElement("select");importType.setAttribute("aria-label","Excel report type");importType.style.cssText="width:auto;margin-left:8px;padding:8px;background:#fff;color:#001338";for(const [value,label] of [["auto","Detect report"],["bad","Bad Orders"],["upcoming","Upcoming"]]){const option=document.createElement("option");option.value=value;option.textContent=label;importType.append(option)}
 const importButton=document.createElement("button");
 importButton.type="button";importButton.textContent="Import Excel";
 importButton.style.cssText="width:auto;background:#ffc107;color:#001338;padding:8px 12px;margin-left:8px";
@@ -82,13 +82,13 @@ function render(data){
  if(!data){status.textContent="No saved reports yet";results.textContent="Tap Sync to load your reports.";return}
  const upcoming=(data.upcoming||[]).filter(row=>outstanding(row,"upcoming"));
  const bad=(data.bad||[]).filter(row=>outstanding(row,"bad"));
- const good=(data.good||[]).filter(row=>outstanding(row,"good"));
+ const good=[];
  const allRows=[...(reportView==="all"||reportView==="upcoming"?upcoming:[]),...(reportView==="all"||reportView==="good"?good:[]),...(reportView==="all"||reportView==="bad"?bad:[])].filter(row=>!holdListFilter||String(row["Hold List"]||"").trim().toUpperCase()===holdListFilter);
  const lots=[...new Set(allRows.map(row=>String(row["Lot Loc"]||"").trim()))].sort(sorter.compare);
  const rows=allRows.filter(row=>selectedLots===null||selectedLots.has(String(row["Lot Loc"]||"").trim())).sort((a,b)=>sortDirection*sorter.compare(String(a[sortColumn]??""),String(b[sortColumn]??"")));
  if(selectedAsset&&!allRows.some(row=>assetKey(row)===selectedAsset))selectedAsset="";
- const displayHeaders=reportView==="good"?["Eq Init Nr","Lot Loc","Hold List","Dwell DD HH"]:HEADERS;
- const viewTabs=document.createElement("div");viewTabs.setAttribute("role","group");viewTabs.setAttribute("aria-label","Order list");viewTabs.style.cssText="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px";for(const [key,label] of [["all","All"],["upcoming","Upcoming"],["good","Good Orders"],["bad","Bad Orders"]]){const tab=document.createElement("button");tab.type="button";tab.textContent=label;tab.setAttribute("aria-pressed",String(reportView===key));tab.style.cssText="width:auto;padding:8px 14px;border-radius:8px;"+(reportView===key?"background:#e87518;color:#fff;":"");tab.addEventListener("click",()=>{reportView=key;selectedLots=null;selectedAsset="";holdListFilter="";render(load())});viewTabs.append(tab)}results.append(viewTabs);
+ const displayHeaders=HEADERS;
+ const viewTabs=document.createElement("div");viewTabs.setAttribute("role","group");viewTabs.setAttribute("aria-label","Order list");viewTabs.style.cssText="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px";for(const [key,label] of [["all","All"],["upcoming","Upcoming"],["bad","Bad Orders"]]){const tab=document.createElement("button");tab.type="button";tab.textContent=label;tab.setAttribute("aria-pressed",String(reportView===key));tab.style.cssText="width:auto;padding:8px 14px;border-radius:8px;"+(reportView===key?"background:#e87518;color:#fff;":"");tab.addEventListener("click",()=>{reportView=key;selectedLots=null;selectedAsset="";holdListFilter="";render(load())});viewTabs.append(tab)}results.append(viewTabs);
  const summary=document.createElement("p");summary.textContent=upcoming.length+" upcoming inspections · "+good.length+" good orders · "+bad.length+" bad orders · "+rows.length+" shown"+(reportView==="all"?"":" · "+(reportView==="bad"?"Bad orders":reportView==="good"?"Good orders":"Upcoming")+" view"+(holdListFilter?" · Hold List: "+holdListFilter:""));results.append(summary);
  const selectionBar=document.createElement("div");selectionBar.className="eod-selection-bar";selectionBar.setAttribute("role","status");const selectionLabel=document.createElement("span");selectionLabel.textContent=selectedAsset?"Selected chassis: "+selectedAsset:"Tap any row to select a chassis for inspection";const inspectSelected=document.createElement("button");inspectSelected.type="button";inspectSelected.textContent="INSPECT";inspectSelected.disabled=!selectedAsset;inspectSelected.addEventListener("click",()=>{if(!selectedAsset)return;window.dispatchEvent(new CustomEvent("eod:inspect-selected",{detail:{asset:selectedAsset}}))});const clearSelection=document.createElement("button");clearSelection.type="button";clearSelection.textContent="CLEAR";clearSelection.disabled=!selectedAsset;clearSelection.addEventListener("click",()=>{selectedAsset="";render(load())});selectionBar.append(inspectSelected);results.append(selectionBar);
  const wrap=document.createElement("div");wrap.style.overflowX="auto";
