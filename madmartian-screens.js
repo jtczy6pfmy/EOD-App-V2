@@ -109,6 +109,25 @@ document.getElementById('mm-back-dashboard').addEventListener('click',()=>show('
 document.getElementById('mm-settings-terminal').addEventListener('click',()=>{show('Add Inspection');document.getElementById('terminal')?.focus()});
 document.querySelectorAll('.mm-board [data-go]').forEach(button=>button.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();show('Upcoming & Bad/Good Order');const view=button.dataset.go==='bad'?'bad':'upcoming';window.dispatchEvent(new CustomEvent('eod:report-view',{detail:view}))},true));
 document.querySelectorAll('.mm-bottom [data-action]').forEach(button=>button.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();const action=button.dataset.action;if(action==='inspection')show('Add Inspection');else if(action==='bad'){show('Upcoming & Bad/Good Order');window.dispatchEvent(new CustomEvent('eod:report-view',{detail:'bad'}))}else if(action==='report')show('Reports');else show('Completed')},true));
-window.addEventListener('eod:inspection-removed',()=>{show('Upcoming & Bad/Good Order');window.dispatchEvent(new Event('eod:show-bocz'));});
+let milestoneTimer=null;
+const milestoneOverlay=document.createElement('div');
+milestoneOverlay.id='mm-milestone-transition';
+milestoneOverlay.setAttribute('role','status');
+milestoneOverlay.setAttribute('aria-live','polite');
+milestoneOverlay.style.cssText='position:fixed;inset:0;z-index:2147483000;background:#111827;color:#fff;display:none;align-items:center;justify-content:center;text-align:center;padding:32px;box-sizing:border-box;';
+milestoneOverlay.innerHTML='<div style="width:min(640px,100%)"><div style="color:#fb923c;font-weight:800;letter-spacing:.15em;font-size:16px">INSPECTION SAVED</div><h1 style="font-size:clamp(32px,7vw,56px);margin:20px 0;color:#fff">Daily Milestones</h1><div id="mm-transition-count" style="font-size:clamp(28px,6vw,46px);font-weight:800;color:#fff"></div><div style="height:24px;background:#374151;border-radius:99px;overflow:hidden;margin:24px 0"><div id="mm-transition-fill" style="height:100%;width:0;background:#fb923c;transition:width .5s"></div></div><div id="mm-transition-milestone" style="font-size:22px;color:#fff"></div><div style="font-size:15px;color:#d1d5db;margin-top:20px">Returning to Upcoming…</div></div>';
+document.body.append(milestoneOverlay);
+window.addEventListener('eod:inspection-removed',()=>{
+ if(milestoneTimer)clearTimeout(milestoneTimer);
+ const count=Number(document.getElementById('count')?.textContent?.match(/\\d+/)?.[0]||document.querySelector('.status-progress-number')?.textContent?.match(/\\d+/)?.[0]||0);
+ const target=Math.max(1,Number(document.getElementById('targetDisplay')?.textContent?.match(/\\d+/)?.[0]||28));
+ const percent=Math.min(100,Math.round(count/target*100));
+ milestoneOverlay.querySelector('#mm-transition-count').textContent=count+' / '+target+' inspections';
+ milestoneOverlay.querySelector('#mm-transition-fill').style.width=percent+'%';
+ const milestone=document.getElementById('milestonePopup')?.textContent?.trim();
+ milestoneOverlay.querySelector('#mm-transition-milestone').textContent=milestone&&milestone.length<180?milestone:percent+'% of daily target completed';
+ milestoneOverlay.style.display='flex';
+ milestoneTimer=setTimeout(()=>{milestoneOverlay.style.display='none';show('Upcoming & Bad/Good Order');window.dispatchEvent(new Event('eod:show-bocz'));milestoneTimer=null;},2500);
+});
 window.addEventListener('eod:inspect-selected',event=>{const asset=String(event.detail?.asset||'').toUpperCase().replace(/[^A-Z0-9]/g,'');const match=asset.match(/^([A-Z]{4})([0-9]{5,6})$/);if(!match)return;show('Add Inspection');document.getElementById('tab-chassis')?.click();const prefix=document.getElementById('prefix');const number=document.getElementById('number');if(!prefix||!number)return;const option=[...prefix.options].find(x=>x.value===match[1]);if(option){prefix.value=match[1];prefix.dispatchEvent(new Event('change',{bubbles:true}))}else{const opt=new Option(match[1],match[1]);prefix.append(opt);prefix.value=match[1];prefix.dispatchEvent(new Event('change',{bubbles:true}))}number.value=match[2];number.dispatchEvent(new Event('input',{bubbles:true}));if(document.activeElement instanceof HTMLElement)document.activeElement.blur();requestAnimationFrame(()=>{document.getElementById("mm-workspace-heading")?.scrollIntoView({behavior:"smooth",block:"start"});});});show('Dashboard');
 })();
