@@ -6,7 +6,7 @@ if(view){
   view.prepend(card);
   const worksheet=document.createElement('section');worksheet.className='card';view.append(worksheet);
   let worksheetMounted=false;
-  async function openWorksheetEditor(){if(worksheetMounted)return;worksheetMounted=true;try{const editor=await import('./worksheet/dist/editor.js?v=2');editor.mountWorksheet(worksheet);}catch{worksheetMounted=false;worksheet.textContent='The worksheet editor could not load. Refresh EOD V2 and try again.';}}
+  async function openWorksheetEditor(){if(worksheetMounted)return;worksheetMounted=true;try{const editor=await import('./worksheet/dist/editor.js?v=3');editor.mountWorksheet(worksheet);}catch{worksheetMounted=false;worksheet.textContent='The worksheet editor could not load. Refresh EOD V2 and try again.';}}
   const nav=document.createElement('button');nav.type='button';nav.className='mm-nav mm-tire-audits-nav';nav.textContent='Tire Audits';
   document.querySelector('.mm-side')?.insertBefore(nav,document.querySelector('.mm-side .mm-footer'));
   nav.onclick=()=>{window.dispatchEvent(new Event('eod:open-tire-audits'));openWorksheetEditor();};
