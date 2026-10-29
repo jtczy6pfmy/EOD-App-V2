@@ -11,6 +11,11 @@ export function mountWorksheet(container){
   root.render(<Worksheet/>);
   return ()=>root.unmount();
 }
+class GridBoundary extends React.Component{
+  state={failed:false};
+  static getDerivedStateFromError(){return {failed:true};}
+  render(){return this.state.failed?<p>The grid could not display this workbook. Your original file is unchanged; its backup and worksheet details remain available below.</p>:this.props.children;}
+}
 function Worksheet(){
   const ref=useRef(null);
   const [sheets,setSheets]=useState(null),[key,setKey]=useState(0),[status,setStatus]=useState('Open the original workbook from Dropbox.'),[busy,setBusy]=useState(false),[backup,setBackup]=useState(null);
@@ -19,7 +24,7 @@ function Worksheet(){
     try{
       const blob=await request('download');
       const file=new File([blob],'Tire Audit Worksheet Aaron McMullen.xlsx',{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-      await transformExcelToFortune(file,setSheets,setKey,ref);
+      await transformExcelToFortune(file, imported=>setSheets(imported.map((sheet,index)=>({...sheet,id:String(sheet.id??index),status:index===0?1:0}))),setKey);
       if(backup)URL.revokeObjectURL(backup);
       setBackup(URL.createObjectURL(blob));
       setStatus('Original workbook loaded. Preview only while save compatibility is checked.');
@@ -29,7 +34,7 @@ function Worksheet(){
   return <section className="eod-worksheet">
     <div className="eod-worksheet-actions"><button type="button" disabled={busy} onClick={load}>{busy?'OPENING…':'OPEN WORKSHEET'}</button>{backup&&<a href={backup} download="Tire Audit Worksheet Aaron McMullen.xlsx">Download original backup</a>}</div>
     <p role="status">{status}</p>
-    {sheets&&<><div className="eod-sheet-frame"><Workbook key={key} ref={ref} data={sheets} lang="en" allowEdit={false} showToolbar={false}/></div>
+    {sheets&&<><div className="eod-sheet-frame"><GridBoundary key={key}><Workbook key={key} ref={ref} data={sheets} lang="en" allowEdit={false} showToolbar={false}/></GridBoundary></div>
     <details className="eod-workbook-details"><summary>Workbook contents</summary>{sheets.map(sheet=><section key={sheet.id||sheet.name}><h3>{sheet.name}</h3><p>{sheet.row} rows · {sheet.column} columns</p><pre>{JSON.stringify({config:sheet.config,validations:sheet.dataVerification,firstCells:sheet.celldata?.slice(0,250)||sheet.data?.slice(0,15)},null,2)}</pre></section>)}</details></>}
   </section>;
 }
