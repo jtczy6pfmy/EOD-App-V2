@@ -6,8 +6,7 @@ EOD V2 is Harrisburg-only. Existing daily data keys and Supabase report tables a
 
 1. In https://www.dropbox.com/developers/apps create a **Scoped access / Full Dropbox** app for EOD V2. Full Dropbox is necessary to access the existing workbook outside an app folder. Enable `account_info.read`, `files.metadata.read`, `files.content.read`, `files.content.write`. Enable public clients / PKCE; implicit grant is not used.
 2. Register this exact redirect: `https://jtczy6pfmy.github.io/EOD-App-V2/dropbox-callback.html`.
-3. Set Supabase Edge Function secrets (never commit their values):
-   - `DROPBOX_APP_KEY`: the Dropbox App key. No App secret is needed with PKCE.
+3. The supplied public Dropbox App key is configured in the function. `DROPBOX_APP_KEY` may optionally override it. No App secret is needed with PKCE. Set these private Supabase Edge Function secrets (never commit their values):
    - `DROPBOX_OWNER_ACCOUNT_ID`: your Dropbox `account_id` (`dbid:…`), obtained using Dropbox's API Explorer `users/get_current_account` while signed into your own account. This is an explicit allowlist; the first visitor cannot claim ownership.
    - `DROPBOX_TOKEN_ENCRYPTION_KEY`: a random 32-byte key encoded as base64. Keep this key stable; changing it requires reconnecting Dropbox.
 4. Run `setup.sql` in the eod-app project. Deploy `supabase/functions/eod-dropbox/index.ts` and `handler.mjs` as `eod-dropbox` with `verify_jwt=false`. The function authenticates requests itself with Dropbox identity and opaque, expiring sessions. All other functions retain their current settings.

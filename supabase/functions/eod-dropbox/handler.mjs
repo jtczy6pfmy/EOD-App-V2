@@ -7,9 +7,11 @@ const unb64 = text => Uint8Array.from(atob(text), c => c.charCodeAt(0));
 const hex = bytes => Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
 export async function hash(value) { return hex(new Uint8Array(await crypto.subtle.digest('SHA-256', encoder.encode(value)))); }
 export function createHandler({ env, fetcher = fetch, clock = Date.now }) {
+  // Dropbox app keys identify a public OAuth client; passwords/secrets never ship here.
+  const appKey = env('DROPBOX_APP_KEY') || 'phh7lctr5ht56b2';
   const cors = {'Access-Control-Allow-Origin': ORIGIN, 'Access-Control-Allow-Headers': 'content-type,x-eod-session,apikey', 'Access-Control-Allow-Methods': 'POST,OPTIONS', 'Cache-Control': 'no-store'};
   const json = (data, status = 200) => new Response(JSON.stringify(data), {status, headers: {...cors, 'Content-Type': 'application/json'}});
-  const configured = () => ['DROPBOX_APP_KEY','DROPBOX_OWNER_ACCOUNT_ID','DROPBOX_TOKEN_ENCRYPTION_KEY','SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY'].every(k => env(k));
+  const configured = () => ['DROPBOX_OWNER_ACCOUNT_ID','DROPBOX_TOKEN_ENCRYPTION_KEY','SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY'].every(k => env(k));
   async function db(table, query, method = 'GET', body) {
     const key = env('SUPABASE_SERVICE_ROLE_KEY');
     const response = await fetcher(`${env('SUPABASE_URL')}/rest/v1/${table}?${query}`, {method, headers: {apikey: key, Authorization: `Bearer ${key}`, 'Content-Type':'application/json', Prefer:'return=representation,resolution=merge-duplicates'}, body: body === undefined ? undefined : JSON.stringify(body)});
@@ -25,7 +27,7 @@ export function createHandler({ env, fetcher = fetch, clock = Date.now }) {
     return b64(iv)+'.'+b64(new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,encoder.encode(value))));
   }
   async function oauth(params) {
-    const response = await fetcher('https://api.dropboxapi.com/oauth2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({...params,client_id:env('DROPBOX_APP_KEY')})});
+    const response = await fetcher('https://api.dropboxapi.com/oauth2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({...params,client_id:appKey})});
     if (!response.ok) throw Error('Dropbox authorization expired or was declined. Connect again.');
     return response.json();
   }
@@ -43,7 +45,7 @@ export function createHandler({ env, fetcher = fetch, clock = Date.now }) {
       const text = await req.text();
       if (text.length > 12000) return json({error:'Request too large.'},413);
       const body = JSON.parse(text);
-      if (body.action === 'config') return json({configured:!!configured(),appKey: configured() ? env('DROPBOX_APP_KEY') : null,redirect:REDIRECT,workbook:WORKBOOK});
+      if (body.action === 'config') return json({configured:!!configured(),appKey: configured() ? appKey : null,redirect:REDIRECT,workbook:WORKBOOK});
       if (!configured()) return json({error:'Dropbox connection needs one-time setup.'},503);
       if (body.action === 'connect') {
         if (typeof body.code !== 'string' || !body.code || body.code.length > 2000 || !/^[A-Za-z0-9._~-]{43,128}$/.test(body.verifier || '')) return json({error:'Invalid sign-in request.'},400);
