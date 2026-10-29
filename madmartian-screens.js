@@ -114,8 +114,12 @@ const milestoneOverlay=document.createElement('div');
 milestoneOverlay.id='mm-milestone-transition';
 milestoneOverlay.setAttribute('role','status');
 milestoneOverlay.setAttribute('aria-live','polite');
-milestoneOverlay.style.cssText='position:fixed;inset:0;z-index:2147483000;background:#111827;color:#fff;display:none;align-items:center;justify-content:center;text-align:center;padding:32px;box-sizing:border-box;';
-milestoneOverlay.innerHTML='<div style="width:min(640px,100%)"><div style="color:#fb923c;font-weight:800;letter-spacing:.15em;font-size:16px">INSPECTION SAVED</div><h1 style="font-size:clamp(32px,7vw,56px);margin:20px 0;color:#fff">Daily Milestones</h1><div id="mm-transition-count" style="font-size:clamp(28px,6vw,46px);font-weight:800;color:#fff"></div><div style="height:24px;background:#374151;border-radius:99px;overflow:hidden;margin:24px 0"><div id="mm-transition-fill" style="height:100%;width:0;background:#fb923c;transition:width .5s"></div></div><div id="mm-transition-milestone" style="font-size:22px;color:#fff"></div><div style="font-size:15px;color:#d1d5db;margin-top:20px">Returning to Upcoming…</div></div>';
+milestoneOverlay.style.cssText='position:fixed;inset:0;z-index:2147483000;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;box-sizing:border-box;overflow:hidden;background:radial-gradient(circle at 50% 35%,#243149 0%,#0b1221 55%,#030712 100%);color:white;--mm-accent:#22b7f0;--mm-glow:#a8eeff;';
+const milestoneStyle=document.createElement('style');
+milestoneStyle.textContent=`@keyframes mmMilestonePop{0%{transform:scale(.55) rotate(-5deg);opacity:0}65%{transform:scale(1.12) rotate(2deg);opacity:1}100%{transform:scale(1) rotate(0)}}@keyframes mmMilestoneHalo{0%,100%{transform:scale(.94);opacity:.45}50%{transform:scale(1.1);opacity:.85}}@keyframes mmMilestoneBurst{0%{transform:translate(-50%,-50%) rotate(var(--angle)) translateY(0) scale(.2);opacity:0}20%{opacity:1}100%{transform:translate(-50%,-50%) rotate(var(--angle)) translateY(-42vmin) scale(1.3);opacity:0}}@keyframes mmMilestoneShine{from{background-position:200% 0}to{background-position:-200% 0}}#mm-milestone-transition .mm-celebration{position:relative;z-index:2;width:min(640px,100%);animation:mmMilestonePop .65s cubic-bezier(.18,.85,.25,1.25) both}#mm-milestone-transition .mm-halo{position:absolute;inset:auto;width:min(78vmin,560px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,transparent 30%,var(--mm-accent) 52%,transparent 72%);filter:blur(35px);opacity:.5;animation:mmMilestoneHalo 1.4s ease-in-out infinite;pointer-events:none}#mm-milestone-transition .mm-particle{position:absolute;left:50%;top:50%;width:12px;height:25px;border-radius:4px;background:var(--mm-accent);box-shadow:0 0 16px var(--mm-glow);animation:mmMilestoneBurst 1.8s ease-out both;pointer-events:none}#mm-milestone-transition .mm-medal{font-size:clamp(56px,14vw,110px);filter:drop-shadow(0 0 22px var(--mm-accent));line-height:1.2}#mm-milestone-transition .mm-percent{font-size:clamp(58px,16vw,120px);font-weight:1000;letter-spacing:-.07em;line-height:1.05;color:var(--mm-glow);text-shadow:0 0 16px var(--mm-accent),0 0 60px var(--mm-accent)}#mm-milestone-transition .mm-progress-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--mm-accent),#fff,var(--mm-accent));background-size:200% 100%;box-shadow:0 0 25px var(--mm-accent);transition:width .8s ease;animation:mmMilestoneShine 1.6s linear infinite}@media(prefers-reduced-motion:reduce){#mm-milestone-transition *,#mm-milestone-transition *::before{animation:none!important;transition:none!important}}`;
+document.head.append(milestoneStyle);
+milestoneOverlay.innerHTML='<div class="mm-halo"></div><div class="mm-celebration"><div id="mm-milestone-icon" class="mm-medal">🎯</div><div id="mm-transition-milestone" class="mm-percent">25%</div><div id="mm-milestone-title" style="font-size:clamp(22px,5vw,38px);font-weight:950;letter-spacing:.13em;margin:12px 0">QUARTER COMPLETE!</div><div id="mm-transition-count" style="font-size:clamp(20px,4vw,28px);font-weight:800;margin:18px 0;color:#e5e7eb"></div><div style="height:24px;background:#263347;border:2px solid #64748b;border-radius:99px;overflow:hidden;margin:24px auto;max-width:520px"><div id="mm-transition-fill" class="mm-progress-fill"></div></div><div style="font-size:14px;letter-spacing:.12em;color:#cbd5e1">RETURNING TO UPCOMING ORDERS…</div></div>';
+for(let i=0;i<24;i++){const particle=document.createElement('span');particle.className='mm-particle';particle.style.setProperty('--angle',i*15+'deg');particle.style.animationDelay=(i%6)*.045+'s';milestoneOverlay.append(particle)}
 document.body.append(milestoneOverlay);
 let lastMilestoneCount=Number(document.getElementById('count')?.textContent||0);
 window.addEventListener('eod:inspection-removed',()=>{
@@ -131,7 +135,16 @@ window.addEventListener('eod:inspection-removed',()=>{
  if(milestoneTimer)clearTimeout(milestoneTimer);
  milestoneOverlay.querySelector('#mm-transition-count').textContent=count+' / '+target+' inspections';
  milestoneOverlay.querySelector('#mm-transition-fill').style.width=Math.min(100,Math.round(currentPercent))+'%';
- milestoneOverlay.querySelector('#mm-transition-milestone').textContent=reached+'% COMPLETE!';
+ const themes={25:{icon:'🎯',title:'QUARTER COMPLETE!',accent:'#22b7f0',glow:'#a8eeff'},50:{icon:'👽',title:'HALFWAY THERE!',accent:'#65d64a',glow:'#c8ffb8'},75:{icon:'⚡',title:'FINAL STRETCH!',accent:'#ff7a35',glow:'#ffd0a8'},100:{icon:'🏆',title:'MISSION COMPLETE!',accent:'#f04b32',glow:'#ffb0a5'}};
+ const theme=themes[reached];
+ milestoneOverlay.style.setProperty('--mm-accent',theme.accent);
+ milestoneOverlay.style.setProperty('--mm-glow',theme.glow);
+ milestoneOverlay.querySelector('#mm-milestone-icon').textContent=theme.icon;
+ milestoneOverlay.querySelector('#mm-milestone-title').textContent=theme.title;
+ milestoneOverlay.querySelector('#mm-transition-milestone').textContent=reached+'%';
+ milestoneOverlay.querySelector('.mm-celebration').style.animation='none';
+ void milestoneOverlay.offsetWidth;
+ milestoneOverlay.querySelector('.mm-celebration').style.animation='';
  milestoneOverlay.style.display='flex';
  milestoneTimer=setTimeout(()=>{milestoneOverlay.style.display='none';returnToOrders();milestoneTimer=null;},2500);
 });
