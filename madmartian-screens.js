@@ -8,7 +8,7 @@ if(dashboardProgress){const board=dashboard.querySelector('.mm-board');if(board)
 const dashboardBottom=app.querySelector('.mm-bottom');if(dashboardBottom)dashboard.append(dashboardBottom);
 const workspace=document.createElement('div');workspace.className='mm-screen mm-workspace';workspace.id='mm-workspace';
 const heading=document.createElement('div');heading.className='mm-workspace-title';heading.innerHTML='<span>OPERATIONS / WORKSPACE</span><h2 id="mm-workspace-heading">Inspections</h2><button type="button" id="mm-back-dashboard">← BACK TO DASHBOARD</button>';workspace.append(heading);const buildTag=document.createElement('small');buildTag.textContent='BUILD 2026.10.16-R2';buildTag.className='mm-build-tag';buildTag.style.cssText='display:inline-block;padding:5px 9px;border:1px solid #26d9ec;border-radius:7px;color:#26d9ec;font-size:11px;font-weight:800;letter-spacing:.5px';heading.append(buildTag);
-const views={};for(const name of ['Upcoming & Bad/Good Order','Add Inspection','Completed','Reports','Settings']){const section=document.createElement('div');section.className='mm-workspace-view';section.dataset.view=name;section.hidden=true;views[name]=section;workspace.append(section)}
+const views={};for(const name of ['Upcoming & Bad/Good Order','Add Inspection','Completed','Reports','Settings','Tire Audits']){const section=document.createElement('div');section.className='mm-workspace-view';section.dataset.view=name;section.hidden=true;views[name]=section;workspace.append(section)}
 const working=document.getElementById('upcomingBadOrders');const completed=document.getElementById('mm-completed')||document.getElementById('inspectionList')?.closest('section.card');const entry=app.querySelector('section.equipment-entry');const terminal=document.getElementById('terminal')?.closest('section.card');const sidebar=app.querySelector('.sidebar-stack');const notes=document.getElementById('generateEod')?.closest('section.card');const preview=document.getElementById('previewCard');
 if(working){
  views['Upcoming & Bad/Good Order'].append(working);
@@ -48,10 +48,13 @@ if(entry)views['Add Inspection'].append(entry);
 // Row 3: keep the existing live Tire Audits and Tallies controls together below the equipment entry.
 const auditTallies=sidebar?.querySelector('.audit-tally-row');
 if(auditTallies){auditTallies.classList.add('mm-inspection-row-three');views['Add Inspection'].append(auditTallies)}
+const tireCard=auditTallies?.querySelector('#tireAuditTotal')?.closest('section.card');
+if(tireCard)views['Tire Audits'].append(tireCard);
+window.addEventListener('eod:open-tire-audits',()=>show('Tire Audits'));
 if(completed)views.Completed.append(completed);
 if(notes)views.Reports.append(notes);
 if(preview)views.Reports.append(preview);
-const settingsInfo=document.createElement('section');settingsInfo.className='card';settingsInfo.innerHTML='<div class="card-header-styled"><h2>Settings</h2></div><div class="card-body"><p>Choose your terminal from Add Inspection. Terminal settings also determine which inspections are saved and reported.</p><button type="button" id="mm-settings-terminal">OPEN TERMINAL SETTINGS</button></div>';views.Settings.append(settingsInfo);
+const settingsInfo=document.createElement('section');settingsInfo.className='card';settingsInfo.innerHTML='<div class="card-header-styled"><h2>Settings</h2></div><div class="card-body"><p>Harrisburg · Daily target: 30 inspections.</p><button type="button" id="mm-settings-terminal">OPEN HARRISBURG INSPECTIONS</button></div>';views.Settings.append(settingsInfo);
 // Show the same live daily progress at the top of every workspace page.
 if(dashboardProgress){
  const progressPanels=[];
@@ -59,13 +62,13 @@ if(dashboardProgress){
   const panel=document.createElement('section');
   panel.className='mm-daily-progress mm-workspace-progress';
   panel.setAttribute('aria-label','Daily inspection progress');
-  panel.innerHTML='<div class="mm-daily-progress-head"><strong>DAILY INSPECTION PROGRESS</strong><span class="mm-workspace-progress-count">0 / 28</span></div><div class="progressbar" role="progressbar" aria-label="Daily inspection progress" aria-valuemin="0" aria-valuemax="28" aria-valuenow="0"><div class="fill"></div></div>';
+  panel.innerHTML='<div class="mm-daily-progress-head"><strong>DAILY INSPECTION PROGRESS</strong><span class="mm-workspace-progress-count">0 / 30</span></div><div class="progressbar" role="progressbar" aria-label="Daily inspection progress" aria-valuemin="0" aria-valuemax="30" aria-valuenow="0"><div class="fill"></div></div>';
   view.prepend(panel);
   progressPanels.push(panel);
  }
  const syncWorkspaceProgress=()=>{
   const current=Number(document.getElementById('count')?.textContent)||0;
-  const target=Math.max(1,Number(document.getElementById('targetDisplay')?.textContent)||28);
+  const target=Math.max(1,Number(document.getElementById('targetDisplay')?.textContent)||30);
   for(const panel of progressPanels){
    panel.querySelector('.mm-workspace-progress-count').textContent=current+' / '+target;
    panel.querySelector('.fill').style.width=Math.min(100,current/target*100)+'%';
@@ -78,8 +81,8 @@ if(dashboardProgress){
  window.addEventListener('eod:recovered',()=>setTimeout(syncWorkspaceProgress,0));
  syncWorkspaceProgress();
 }
-app.replaceChildren(dashboard,workspace);
-const names=['Dashboard','Upcoming & Bad/Good Order','Add Inspection','Completed','Reports','Settings'];const tabs=[...document.querySelectorAll('.mm-side .mm-nav:not(.mm-imrs-nav)')];let active='Dashboard';
+app.replaceChildren(dashboard,workspace);window.dispatchEvent(new Event("eod:inspection-data-changed"));
+const names=['Dashboard','Upcoming & Bad/Good Order','Add Inspection','Completed','Reports','Settings','Tire Audits'];const tabs=[...document.querySelectorAll('.mm-side .mm-nav:not(.mm-imrs-nav)')];let active='Dashboard';
 const inspectNav=tabs.find(b=>b.textContent.trim()==='INSPECT'||b.textContent.trim()==='Settings');
 if(inspectNav){
  inspectNav.textContent='INSPECT';
@@ -127,7 +130,7 @@ document.body.append(milestoneOverlay);
 let lastMilestoneCount=Number(document.getElementById('count')?.textContent||0);
 window.addEventListener('eod:inspection-removed',()=>{
  const count=Number(document.getElementById('count')?.textContent||0);
- const target=Math.max(1,Number(document.getElementById('targetDisplay')?.textContent||28));
+ const target=Math.max(1,Number(document.getElementById('targetDisplay')?.textContent||30));
  const milestones=[25,50,75,100];
  const previousPercent=lastMilestoneCount/target*100;
  const currentPercent=count/target*100;

@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Connect Dropbox · EOD V2</title><style>body{font:18px system-ui;background:#07180f;color:#fff;max-width:650px;margin:15vh auto;padding:24px}a{color:#9afa75}</style></head><body><h1>Connecting Dropbox</h1><p id="status" role="status">Completing your secure sign-in…</p><a href="./index.html">Return to EOD V2</a><script type="module">
+import {consumePending,request,SESSION} from './dropbox-auth.mjs';
+const search=location.search;
+history.replaceState(null,'',location.pathname);
+try{
+  const credentials=consumePending(search);
+  const data=await request('connect',credentials);
+  localStorage.setItem(SESSION,data.session);
+  sessionStorage.setItem('eod_open_tire_audits','1');
+  location.replace('./index.html');
+}catch(error){document.getElementById('status').textContent=error.message;}
+</script></body></html>
