@@ -8,25 +8,8 @@
     30: { icon: "🏆", title: "DAILY TARGET COMPLETE!", subtitle: "30 / 30 INSPECTIONS", color: "#F04B32", highlight: "#FFB0A5" }
   };
 
-  const STANDARD_MILESTONES = {
-    7:  { icon: "🎯", title: "25% COMPLETE!", subtitle: "7 / 28 INSPECTIONS", color: "#22B7F0", highlight: "#A8EEFF" },
-    14: { icon: "👽", title: "50% COMPLETE!", subtitle: "14 / 28 INSPECTIONS", color: "#65D64A", highlight: "#C8FFB8" },
-    21: { icon: "⚡", title: "75% COMPLETE!", subtitle: "21 / 28 INSPECTIONS", color: "#FF7A35", highlight: "#FFD0A8" },
-    28: { icon: "🏆", title: "DAILY TARGET COMPLETE!", subtitle: "28 / 28 INSPECTIONS", color: "#F04B32", highlight: "#FFB0A5" }
-  };
-
-  function isHarrisburg() {
-    const terminal = document.getElementById("terminal");
-    return terminal && terminal.value === "HARRISBURG";
-  }
-
-  function getMilestones() {
-    return isHarrisburg() ? HARRISBURG_MILESTONES : STANDARD_MILESTONES;
-  }
-
-  function getTarget() {
-    return isHarrisburg() ? 30 : 28;
-  }
+  function getMilestones(){return HARRISBURG_MILESTONES}
+  function getTarget(){return 30}
 
   let lastTotal = null;
   let showing = false;

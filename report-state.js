@@ -78,10 +78,9 @@
     const match=number.trim().toUpperCase().match(/^([A-Z]{4})\s+(\d+)$/);
     if(!match)return "Enter a 4-letter prefix followed by the equipment number.";
     const [,prefix,digits]=match;
-    const expected=category==="chassis"&&terminal==="HARRISBURG"&&prefix==="AIMZ"?5:6;
+    const expected=category==="chassis"&&prefix==="AIMZ"?5:6;
     if(digits.length!==expected)return `Enter exactly ${expected} digits for this equipment number.`;
-    const special=["CALUMET","LANDERS","CHGO 63RD","CHICAGO 47TH"].includes(terminal);
-    const prefixes=terminal==="HARRISBURG"?["NSPZ","NSFZ","AIMZ"]:special?["NSPZ","NSFZ","TSXZ","LSFZ","TSFZ","TSNZ","PAHZ","PBRZ","UPDZ","UPHZ","DDRZ","DDTZ","DDGZ"]:["NSPZ","NSFZ"];
+    const prefixes=["NSPZ","NSFZ","AIMZ"];
     if(category==="chassis"&&!prefixes.includes(prefix))return "Choose a chassis prefix available at this terminal.";
     if(category==="racks"&&prefix!=="ZNSU")return "Chassis racks must use the ZNSU prefix.";
     const normalized=prefix+" "+digits;
