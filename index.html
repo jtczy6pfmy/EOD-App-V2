@@ -164,7 +164,7 @@ function buildReportText(){
    if(defects.length===0)txt+=`1.\n\n`;
   });
  });
- txt+=`\nTIRE AUDITS\n\n(${Number(data.tireAudits)||0}) Tire audits completed\n(${Math.floor((Number(data.tireAudits)||0)/3)}) Inspection credits (3 tire audits = 1 inspection)\n\n(${total()}) TOTAL INSPECTIONS COMPLETED\n\nComments or Notes of Interest`;
+ txt+=`\n(${Number(data.tireAudits)||0}) TIRE AUDITS\n\n(${total()}) TOTAL INSPECTIONS COMPLETED\n\nComments or Notes of Interest`;
  if(notes.value.trim())txt+=`\n\n${notes.value.trim()}`;
  return txt;
 }
