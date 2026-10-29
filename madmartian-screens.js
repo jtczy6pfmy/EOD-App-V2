@@ -155,7 +155,7 @@ window.addEventListener('eod:inspection-removed',()=>{
  void milestoneOverlay.offsetWidth;
  milestoneOverlay.querySelector('.mm-celebration').style.animation='';
  milestoneOverlay.style.display='flex';
- milestoneTimer=setTimeout(()=>{milestoneOverlay.style.display='none';returnToOrders();milestoneTimer=null;},2500);
+ milestoneTimer=setTimeout(()=>{milestoneOverlay.style.display='none';returnToOrders();milestoneTimer=null;},5000);
 });
 window.addEventListener('eod:inspect-selected',event=>{const asset=String(event.detail?.asset||'').toUpperCase().replace(/[^A-Z0-9]/g,'');const match=asset.match(/^([A-Z]{4})([0-9]{5,6})$/);if(!match)return;show('Add Inspection');document.getElementById('tab-chassis')?.click();const prefix=document.getElementById('prefix');const number=document.getElementById('number');if(!prefix||!number)return;const option=[...prefix.options].find(x=>x.value===match[1]);if(option){prefix.value=match[1];prefix.dispatchEvent(new Event('change',{bubbles:true}))}else{const opt=new Option(match[1],match[1]);prefix.append(opt);prefix.value=match[1];prefix.dispatchEvent(new Event('change',{bubbles:true}))}number.value=match[2];number.dispatchEvent(new Event('input',{bubbles:true}));if(document.activeElement instanceof HTMLElement)document.activeElement.blur();requestAnimationFrame(()=>{document.getElementById("mm-workspace-heading")?.scrollIntoView({behavior:"smooth",block:"start"});});});show('Dashboard');
 })();
