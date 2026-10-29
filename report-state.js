@@ -31,15 +31,16 @@
       if(!r.deleted&&TYPES[r.category]?.includes(r.type))data[r.category][r.type][section(r.type)].push([r.number,r.condition,r.note,id]);
     });
     data.tireAudits=result._sync.fields.tireAudits.value;
+    data.tireAuditRows=result._sync.fields.tireAuditRows?.value||"";
     result.data=data;result.notes=result._sync.fields.notes.value;
     return result;
   }
   function normalize(state){
     if(!state)return null;
-    if(state._sync?.version===1)return materialize(state);
+    if(state._sync?.version===1){state=clone(state);state._sync.fields.tireAuditRows ||= {value:state.data?.tireAuditRows||"",updated:"0"};return materialize(state);}
     const records={};
     flatten(state.data).forEach((r,index)=>{const id=r.id||legacyId(r);records[id]={...r,id,created:String(index),updated:"0",deleted:false};});
-    return materialize({...state,_sync:{version:1,records,fields:{notes:{value:state.notes||"",updated:"0"},tireAudits:{value:Number(state.data?.tireAudits)||0,updated:"0"}}}});
+    return materialize({...state,_sync:{version:1,records,fields:{tireAuditRows:{value:state.data?.tireAuditRows||"",updated:"0"},notes:{value:state.notes||"",updated:"0"},tireAudits:{value:Number(state.data?.tireAudits)||0,updated:"0"}}}});
   }
   function choose(a,b){
     if(!a)return b;if(!b)return a;
@@ -52,7 +53,7 @@
     if(a.terminal!==b.terminal||a.date!==b.date)throw new Error("Reports must belong to the same terminal and day.");
     const records={};
     new Set([...Object.keys(a._sync.records),...Object.keys(b._sync.records)]).forEach(id=>{records[id]=choose(a._sync.records[id],b._sync.records[id]);});
-    const fields={};["notes","tireAudits"].forEach(key=>{fields[key]=choose(a._sync.fields[key],b._sync.fields[key]);});
+    const fields={};["notes","tireAudits","tireAuditRows"].forEach(key=>{fields[key]=choose(a._sync.fields[key],b._sync.fields[key]);});
     return materialize({...b,_sync:{version:1,records:reconcile(records),fields}});
   }
   function save(previous,draft,client,now=Date.now()){
@@ -68,7 +69,7 @@
       sync.records[id]=changed?{...r,id,created:old?.created||updated,updated,deleted:false,replaces:old?[...new Set([...(old.replaces||[]),identity(old)])]:[]}:old;
     });
     Object.entries(sync.records).forEach(([id,r])=>{if(!r.deleted&&!live.has(id))sync.records[id]={...r,deleted:true,updated};});
-    const values={notes:draft.notes||"",tireAudits:Number(draft.data.tireAudits)||0};
+    const values={tireAuditRows:draft.data.tireAuditRows||"",notes:draft.notes||"",tireAudits:Number(draft.data.tireAudits)||0};
     Object.entries(values).forEach(([key,value])=>{if(sync.fields[key].value!==value)sync.fields[key]={value,updated};});
     reconcile(sync.records);
     return materialize({...draft,_sync:sync});
