@@ -8,7 +8,7 @@ if(dashboardProgress){const board=dashboard.querySelector('.mm-board');if(board)
 const dashboardBottom=app.querySelector('.mm-bottom');if(dashboardBottom)dashboard.append(dashboardBottom);
 const workspace=document.createElement('div');workspace.className='mm-screen mm-workspace';workspace.id='mm-workspace';
 const heading=document.createElement('div');heading.className='mm-workspace-title';heading.innerHTML='<span>OPERATIONS / WORKSPACE</span><h2 id="mm-workspace-heading">Inspections</h2><button type="button" id="mm-back-dashboard">← BACK TO DASHBOARD</button>';workspace.append(heading);const buildTag=document.createElement('small');buildTag.textContent='BUILD 2026.10.16-R2';buildTag.className='mm-build-tag';buildTag.style.cssText='display:inline-block;padding:5px 9px;border:1px solid #26d9ec;border-radius:7px;color:#26d9ec;font-size:11px;font-weight:800;letter-spacing:.5px';heading.append(buildTag);
-const views={};for(const name of ['Upcoming & Bad/Good Order','Add Inspection','Completed','Reports','Settings','Tire Audits']){const section=document.createElement('div');section.className='mm-workspace-view';section.dataset.view=name;section.hidden=true;views[name]=section;workspace.append(section)}
+const views={};for(const name of ['Upcoming & Bad/Good Order','Add Inspection','Completed','Reports','Settings']){const section=document.createElement('div');section.className='mm-workspace-view';section.dataset.view=name;section.hidden=true;views[name]=section;workspace.append(section)}
 const working=document.getElementById('upcomingBadOrders');const completed=document.getElementById('mm-completed')||document.getElementById('inspectionList')?.closest('section.card');const entry=app.querySelector('section.equipment-entry');const terminal=document.getElementById('terminal')?.closest('section.card');const sidebar=app.querySelector('.sidebar-stack');const notes=document.getElementById('generateEod')?.closest('section.card');const preview=document.getElementById('previewCard');
 if(working){
  views['Upcoming & Bad/Good Order'].append(working);
@@ -45,12 +45,9 @@ if(working){
 }
 if(sidebar)views['Add Inspection'].append(sidebar);
 if(entry)views['Add Inspection'].append(entry);
-// Row 3: keep the existing live Tire Audits and Tallies controls together below the equipment entry.
+// Keep equipment tallies with the inspection entry.
 const auditTallies=sidebar?.querySelector('.audit-tally-row');
 if(auditTallies){auditTallies.classList.add('mm-inspection-row-three');views['Add Inspection'].append(auditTallies)}
-const tireCard=auditTallies?.querySelector('#tireAuditTotal')?.closest('section.card');
-if(tireCard)views['Tire Audits'].append(tireCard);
-window.addEventListener('eod:open-tire-audits',()=>show('Tire Audits'));
 if(completed)views.Completed.append(completed);
 if(notes)views.Reports.append(notes);
 if(preview)views.Reports.append(preview);
