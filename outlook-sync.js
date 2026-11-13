@@ -25,7 +25,8 @@ const importType=document.createElement("select");importType.setAttribute("aria-
 const importButton=document.createElement("button");
 importButton.type="button";importButton.textContent="Import Excel";
 importButton.style.cssText="width:auto;background:#ffc107;color:#001338;padding:8px 12px;margin-left:8px";
-button.after(fileInput,importType);
+button.after(fileInput,importType,importButton);
+importButton.addEventListener("click",()=>fileInput.click());
 button.setAttribute("aria-label","Refresh saved Upcoming and Bad Orders");
 
 function get(row,...names){
@@ -81,7 +82,7 @@ function render(data){
  results.replaceChildren();
  if(!data){status.textContent="No saved reports yet";results.textContent="Tap Sync to load your reports.";return}
  const upcoming=(data.upcoming||[]).filter(row=>outstanding(row,"upcoming"));
- const bad=(data.bad||[]).filter(row=>Boolean(assetKey(row)));
+ const bad=(data.bad||[]);
  const upcomingRows=new Set(upcoming);
  const good=[];
  const allRows=[...(reportView==="all"||reportView==="upcoming"?upcoming:[]),...(reportView==="all"||reportView==="good"?good:[]),...(reportView==="all"||reportView==="bad"?bad:[])].filter(row=>!holdListFilter||String(row["Hold List"]||"").trim().toUpperCase()===holdListFilter);
@@ -90,7 +91,7 @@ function render(data){
  if(selectedAsset&&!allRows.some(row=>assetKey(row)===selectedAsset))selectedAsset="";
  const displayHeaders=HEADERS;
  const viewTabs=document.createElement("div");viewTabs.setAttribute("role","group");viewTabs.setAttribute("aria-label","Order list");viewTabs.style.cssText="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px";for(const [key,label] of [["all","All"],["upcoming","Upcoming"],["bad","Bad Orders"]]){const tab=document.createElement("button");tab.type="button";tab.textContent=label;tab.setAttribute("aria-pressed",String(reportView===key));tab.style.cssText="width:auto;padding:8px 14px;border-radius:8px;"+(reportView===key?"background:#e87518;color:#fff;":"");tab.addEventListener("click",()=>{reportView=key;selectedLots=null;selectedAsset="";holdListFilter="";render(load())});viewTabs.append(tab)}results.append(viewTabs);
- const summary=document.createElement("p");summary.textContent=upcoming.length+" upcoming inspections · "+bad.length+" bad orders · "+rows.length+" shown"+(reportView==="all"?"":" · "+(reportView==="bad"?"Bad orders":reportView==="good"?"Good orders":"Upcoming")+" view"+(holdListFilter?" · Hold List: "+holdListFilter:""));results.append(summary);
+ const summary=document.createElement("p");summary.textContent=upcoming.length+" upcoming inspections · "+bad.length+" bad orders · "+rows.length+" shown"+(reportView==="all"?"":" · "+(reportView==="bad"?"Bad orders":reportView==="good"?"Good orders":"Upcoming")+" view"+(holdListFilter?" · Hold List: "+holdListFilter:""));results.append(summary);if(reportView==="bad"){const diagnostic=document.createElement("p");diagnostic.textContent="Bad Order source: "+(data.bad||[]).length+" rows · "+bad.filter(row=>Boolean(assetKey(row))).length+" with chassis numbers"+(data.badImported?" · Imported from Excel on this device":" · Synced from cloud");results.append(diagnostic);}
  const selectionBar=document.createElement("div");selectionBar.className="eod-selection-bar";selectionBar.setAttribute("role","status");const selectionLabel=document.createElement("span");selectionLabel.textContent=selectedAsset?"Selected chassis: "+selectedAsset:"Tap any row to select a chassis for inspection";const inspectSelected=document.createElement("button");inspectSelected.type="button";inspectSelected.textContent="INSPECT";inspectSelected.disabled=!selectedAsset;inspectSelected.addEventListener("click",()=>{if(!selectedAsset)return;window.dispatchEvent(new CustomEvent("eod:inspect-selected",{detail:{asset:selectedAsset}}))});const clearSelection=document.createElement("button");clearSelection.type="button";clearSelection.textContent="CLEAR";clearSelection.disabled=!selectedAsset;clearSelection.addEventListener("click",()=>{selectedAsset="";render(load())});selectionBar.append(inspectSelected);results.append(selectionBar);
  const wrap=document.createElement("div");wrap.style.overflowX="auto";
  const table=document.createElement("table");table.style.cssText="width:100%;border-collapse:collapse;font-size:1rem";
@@ -136,7 +137,7 @@ fileInput.addEventListener("change",async()=>{
   if(unknown.length)throw new Error("Unrecognized spreadsheet columns: "+unknown.map(f=>f.name).join(", "));
   const existing=load()||{bad:[],good:[],upcoming:[]};
   for(const file of imported.filter(file=>file.kind!=="good"))existing[file.kind]=prepareSyncedRows(file.rows.map(r=>normalize(r,file.kind)).filter(Boolean),file.kind);
-  existing.updated=Date.now();
+  existing.updated=Date.now();if(imported.some(file=>file.kind==="bad"))existing.badImported=true;
   localStorage.setItem(KEY,JSON.stringify(existing));
   render(existing);window.dispatchEvent(new Event("eod:reports-updated"));
  }catch(error){status.textContent="Import failed: "+error.message}
@@ -152,7 +153,7 @@ async function cloudRefresh(ask=false){
   const payload=await response.json(),reports=payload.reports||[];
   if(!reports.length){status.textContent="Cloud connected · No imported reports yet";return}
   const data=load()||{upcoming:[],good:[],bad:[]};
-  for(const report of reports)if(report.report_type==="bad"||report.report_type==="upcoming"){if(Array.isArray(report.rows)&&report.rows.length)data[report.report_type]=prepareSyncedRows(report.rows,report.report_type);}
+  for(const report of reports)if(report.report_type==="bad"||report.report_type==="upcoming"){if(Array.isArray(report.rows)&&report.rows.length){if(report.report_type==="bad"&&data.badImported&&!ask)continue;data[report.report_type]=prepareSyncedRows(report.rows,report.report_type);if(report.report_type==="bad")data.badImported=false;}}
   data.updated=Date.now();localStorage.setItem(KEY,JSON.stringify(data));render(data);window.dispatchEvent(new Event("eod:reports-updated"));
   status.textContent="Synced from cloud "+new Date().toLocaleString()+" · "+reports.map(r=>r.report_type+": "+new Date(r.updated_at).toLocaleString()).join(" · ");
  }catch(error){status.textContent=error.message}
