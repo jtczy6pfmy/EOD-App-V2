@@ -82,6 +82,7 @@ function render(data){
  if(!data){status.textContent="No saved reports yet";results.textContent="Tap Sync to load your reports.";return}
  const upcoming=(data.upcoming||[]).filter(row=>outstanding(row,"upcoming"));
  const bad=(data.bad||[]).filter(row=>Boolean(assetKey(row)));
+ const upcomingRows=new Set(upcoming);
  const good=[];
  const allRows=[...(reportView==="all"||reportView==="upcoming"?upcoming:[]),...(reportView==="all"||reportView==="good"?good:[]),...(reportView==="all"||reportView==="bad"?bad:[])].filter(row=>!holdListFilter||String(row["Hold List"]||"").trim().toUpperCase()===holdListFilter);
  const lots=[...new Set(allRows.map(row=>String(row["Lot Loc"]||"").trim()))].sort(sorter.compare);
@@ -89,7 +90,7 @@ function render(data){
  if(selectedAsset&&!allRows.some(row=>assetKey(row)===selectedAsset))selectedAsset="";
  const displayHeaders=HEADERS;
  const viewTabs=document.createElement("div");viewTabs.setAttribute("role","group");viewTabs.setAttribute("aria-label","Order list");viewTabs.style.cssText="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px";for(const [key,label] of [["all","All"],["upcoming","Upcoming"],["bad","Bad Orders"]]){const tab=document.createElement("button");tab.type="button";tab.textContent=label;tab.setAttribute("aria-pressed",String(reportView===key));tab.style.cssText="width:auto;padding:8px 14px;border-radius:8px;"+(reportView===key?"background:#e87518;color:#fff;":"");tab.addEventListener("click",()=>{reportView=key;selectedLots=null;selectedAsset="";holdListFilter="";render(load())});viewTabs.append(tab)}results.append(viewTabs);
- const summary=document.createElement("p");summary.textContent=upcoming.length+" upcoming inspections · "+bad.length+" bad orders in source · "+bad.filter(row=>completed().has(assetKey(row))).length+" previously completed/hidden · "+rows.length+" shown"+(reportView==="all"?"":" · "+(reportView==="bad"?"Bad orders":reportView==="good"?"Good orders":"Upcoming")+" view"+(holdListFilter?" · Hold List: "+holdListFilter:""));results.append(summary);
+ const summary=document.createElement("p");summary.textContent=upcoming.length+" upcoming inspections · "+bad.length+" bad orders · "+rows.length+" shown"+(reportView==="all"?"":" · "+(reportView==="bad"?"Bad orders":reportView==="good"?"Good orders":"Upcoming")+" view"+(holdListFilter?" · Hold List: "+holdListFilter:""));results.append(summary);
  const selectionBar=document.createElement("div");selectionBar.className="eod-selection-bar";selectionBar.setAttribute("role","status");const selectionLabel=document.createElement("span");selectionLabel.textContent=selectedAsset?"Selected chassis: "+selectedAsset:"Tap any row to select a chassis for inspection";const inspectSelected=document.createElement("button");inspectSelected.type="button";inspectSelected.textContent="INSPECT";inspectSelected.disabled=!selectedAsset;inspectSelected.addEventListener("click",()=>{if(!selectedAsset)return;window.dispatchEvent(new CustomEvent("eod:inspect-selected",{detail:{asset:selectedAsset}}))});const clearSelection=document.createElement("button");clearSelection.type="button";clearSelection.textContent="CLEAR";clearSelection.disabled=!selectedAsset;clearSelection.addEventListener("click",()=>{selectedAsset="";render(load())});selectionBar.append(inspectSelected);results.append(selectionBar);
  const wrap=document.createElement("div");wrap.style.overflowX="auto";
  const table=document.createElement("table");table.style.cssText="width:100%;border-collapse:collapse;font-size:1rem";
@@ -114,11 +115,11 @@ function render(data){
  const actionHead=document.createElement("th");actionHead.textContent="Remove";actionHead.style.cssText="padding:8px;text-align:center;border-bottom:1px solid #cbd5e1";head.append(actionHead);
  const thead=document.createElement("thead");thead.append(head);table.append(thead);
  const tbody=document.createElement("tbody");
- for(const row of rows){const tr=document.createElement("tr");const id=assetKey(row);const wasCompleted=completed().has(id);tr.className="eod-data-row"+(id===selectedAsset?" eod-row-selected":"");tr.tabIndex=0;tr.setAttribute("aria-selected",String(id===selectedAsset));if(wasCompleted){tr.style.opacity="0.7";tr.title="Previously completed or removed on this device";}const select=()=>{selectedAsset=selectedAsset===id?"":id;render(load())};tr.addEventListener("click",select);tr.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();select()}});for(const h of displayHeaders){const td=document.createElement("td");td.textContent=row[h]||"";td.style.cssText="padding:7px;border-bottom:1px solid #e2e8f0";tr.append(td)}
+ for(const row of rows){const tr=document.createElement("tr");const id=assetKey(row);const isFhwaRow=upcomingRows.has(row);tr.className="eod-data-row"+(id===selectedAsset?" eod-row-selected":"");tr.tabIndex=0;tr.setAttribute("aria-selected",String(id===selectedAsset));const select=()=>{selectedAsset=selectedAsset===id?"":id;render(load())};tr.addEventListener("click",select);tr.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();select()}});for(const h of displayHeaders){const td=document.createElement("td");td.textContent=row[h]||"";td.style.cssText="padding:7px;border-bottom:1px solid #e2e8f0";tr.append(td)}
  const actionCell=document.createElement("td");actionCell.style.cssText="padding:5px;border-bottom:1px solid #e2e8f0;text-align:center";
  const remove=document.createElement("button");remove.type="button";remove.textContent="Delete";remove.setAttribute("aria-label","Remove completed chassis "+id);remove.style.cssText="width:auto;padding:7px 10px;border-radius:6px;background:#b91c1c;color:white;font-size:.85rem";
- remove.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();if(!confirm("Remove "+id+" from Upcoming and Bad Orders? It will stay hidden after the next sync."))return;const ids=completed();ids.add(id);localStorage.setItem(COMPLETED_KEY,JSON.stringify([...ids]));const current=load();if(current){for(const kind of ["upcoming","bad"])current[kind]=(current[kind]||[]).filter(item=>assetKey(item)!==id);localStorage.setItem(KEY,JSON.stringify(current))}if(selectedAsset===id)selectedAsset="";render(load());window.dispatchEvent(new Event("eod:reports-updated"))});
- if(wasCompleted){remove.textContent="Previously done";remove.disabled=true;remove.style.background="#64748b";}actionCell.append(remove);tr.append(actionCell);tbody.append(tr)}
+ remove.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();if(!confirm("Remove "+id+" from the FHWA Upcoming list? It will stay hidden after the next sync."))return;const ids=completed();ids.add(id);localStorage.setItem(COMPLETED_KEY,JSON.stringify([...ids]));const current=load();if(current){current.upcoming=(current.upcoming||[]).filter(item=>assetKey(item)!==id);localStorage.setItem(KEY,JSON.stringify(current))}if(selectedAsset===id)selectedAsset="";render(load());window.dispatchEvent(new Event("eod:reports-updated"))});
+ if(isFhwaRow)actionCell.append(remove);else actionCell.textContent="—";tr.append(actionCell);tbody.append(tr)}
  table.append(tbody);wrap.append(table);results.append(wrap);
  status.textContent="Updated "+new Date(data.updated).toLocaleString();
 }
@@ -172,7 +173,7 @@ if(addInspection&&chassisNumber&&chassisPrefix){
  addInspection.addEventListener("click",()=>{
   if(pending&&chassisNumber.value===""&&/^(?:AIMZ|NSPZ|NSFZ)/.test(pending)){
    const ids=completed();ids.add(pending);localStorage.setItem(COMPLETED_KEY,JSON.stringify([...ids]));
-   const data=load();if(data){for(const kind of ["upcoming","good","bad"])data[kind]=(data[kind]||[]).filter(row=>assetKey(row)!==pending);localStorage.setItem(KEY,JSON.stringify(data))}
+   const data=load();if(data){data.upcoming=(data.upcoming||[]).filter(row=>assetKey(row)!==pending);localStorage.setItem(KEY,JSON.stringify(data))}
    render(load());window.dispatchEvent(new Event("eod:reports-updated"));
    window.dispatchEvent(new CustomEvent("eod:inspection-removed",{detail:{asset:pending}}));
   }
