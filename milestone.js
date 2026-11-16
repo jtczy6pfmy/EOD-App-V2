@@ -2,10 +2,10 @@
   "use strict";
 
   const HARRISBURG_MILESTONES = {
-    8:  { icon: "🎯", title: "25% COMPLETE!", subtitle: "8 / 30 INSPECTIONS", color: "#22B7F0", highlight: "#A8EEFF" },
-    15: { icon: "👽", title: "50% COMPLETE!", subtitle: "15 / 30 INSPECTIONS", color: "#65D64A", highlight: "#C8FFB8" },
-    23: { icon: "⚡", title: "75% COMPLETE!", subtitle: "23 / 30 INSPECTIONS", color: "#FF7A35", highlight: "#FFD0A8" },
-    30: { icon: "🏆", title: "DAILY TARGET COMPLETE!", subtitle: "30 / 30 INSPECTIONS", color: "#F04B32", highlight: "#FFB0A5" }
+    8:  { icon: "🎯", title: "25% COMPLETE!", subtitle: "7 / 28 INSPECTIONS", color: "#22B7F0", highlight: "#A8EEFF" },
+    15: { icon: "👽", title: "50% COMPLETE!", subtitle: "14 / 28 INSPECTIONS", color: "#65D64A", highlight: "#C8FFB8" },
+    23: { icon: "⚡", title: "75% COMPLETE!", subtitle: "22 / 28 INSPECTIONS", color: "#FF7A35", highlight: "#FFD0A8" },
+    30: { icon: "🏆", title: "DAILY TARGET COMPLETE!", subtitle: "28 / 28 INSPECTIONS", color: "#F04B32", highlight: "#FFB0A5" }
   };
 
   function getMilestones(){return HARRISBURG_MILESTONES}
