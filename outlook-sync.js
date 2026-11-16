@@ -153,7 +153,7 @@ async function cloudRefresh(ask=false){
   const payload=await response.json(),reports=payload.reports||[];
   if(!reports.length){status.textContent="Cloud connected · No imported reports yet";return}
   const data=load()||{upcoming:[],good:[],bad:[]};
-  for(const report of reports)if(report.report_type==="bad"||report.report_type==="upcoming"){if(Array.isArray(report.rows)&&report.rows.length){if(report.report_type==="bad"&&data.badImported&&!ask)continue;data[report.report_type]=prepareSyncedRows(report.rows,report.report_type);if(report.report_type==="bad")data.badImported=false;}}
+  for(const report of reports)if(report.report_type==="bad"||report.report_type==="upcoming"){if(Array.isArray(report.rows)&&report.rows.length){data[report.report_type]=prepareSyncedRows(report.rows,report.report_type);if(report.report_type==="bad")data.badImported=false;}}
   data.updated=Date.now();localStorage.setItem(KEY,JSON.stringify(data));render(data);window.dispatchEvent(new Event("eod:reports-updated"));
   status.textContent="Synced from cloud "+new Date().toLocaleString()+" · "+reports.map(r=>r.report_type+": "+new Date(r.updated_at).toLocaleString()).join(" · ");
  }catch(error){status.textContent=error.message}
