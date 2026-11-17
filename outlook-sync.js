@@ -5,6 +5,9 @@ const button=document.getElementById("outlookSyncButton"),status=document.getEle
 if(!button||!status||!results)return;
 const KEY="eod_combined_reports_v1";
 const COMPLETED_KEY="eod_completed_assets_v1";
+const BAD_REMOVED_KEY="eod_removed_bad_orders_v1";
+function removedBad(){try{return new Set(JSON.parse(localStorage.getItem(BAD_REMOVED_KEY)||"[]"))}catch{return new Set()}}
+function removeBad(id){if(!id)return;const ids=removedBad();ids.add(id);localStorage.setItem(BAD_REMOVED_KEY,JSON.stringify([...ids]));}
 const assetKey=row=>String(row["Eq Init Nr"]||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
 function completed(){try{return new Set(JSON.parse(localStorage.getItem(COMPLETED_KEY)||"[]"))}catch{return new Set()}}
 function markCompleted(row){const ids=completed();ids.add(assetKey(row));localStorage.setItem(COMPLETED_KEY,JSON.stringify([...ids]));render(load())}
@@ -82,7 +85,7 @@ function render(data){
  results.replaceChildren();
  if(!data){status.textContent="No saved reports yet";results.textContent="Tap Sync to load your reports.";return}
  const upcoming=(data.upcoming||[]).filter(row=>outstanding(row,"upcoming"));
- const bad=(data.bad||[]);
+ const bad=(data.bad||[]).filter(row=>!removedBad().has(assetKey(row)));
  const upcomingRows=new Set(upcoming);
  const good=[];
  const allRows=[...(reportView==="all"||reportView==="upcoming"?upcoming:[]),...(reportView==="all"||reportView==="good"?good:[]),...(reportView==="all"||reportView==="bad"?bad:[])].filter(row=>!holdListFilter||String(row["Hold List"]||"").trim().toUpperCase()===holdListFilter);
@@ -119,7 +122,7 @@ function render(data){
  for(const row of rows){const tr=document.createElement("tr");const id=assetKey(row);const isFhwaRow=upcomingRows.has(row);tr.className="eod-data-row"+(id===selectedAsset?" eod-row-selected":"");tr.tabIndex=0;tr.setAttribute("aria-selected",String(id===selectedAsset));const select=()=>{selectedAsset=selectedAsset===id?"":id;render(load())};tr.addEventListener("click",select);tr.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();select()}});for(const h of displayHeaders){const td=document.createElement("td");td.textContent=row[h]||"";td.style.cssText="padding:7px;border-bottom:1px solid #e2e8f0";tr.append(td)}
  const actionCell=document.createElement("td");actionCell.style.cssText="padding:5px;border-bottom:1px solid #e2e8f0;text-align:center";
  const remove=document.createElement("button");remove.type="button";remove.textContent="Delete";remove.setAttribute("aria-label","Remove completed chassis "+id);remove.style.cssText="width:auto;padding:7px 10px;border-radius:6px;background:#b91c1c;color:white;font-size:.85rem";
- remove.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();const kind=isFhwaRow?"upcoming":"bad";const message=isFhwaRow?"Remove "+id+" from the FHWA Upcoming list? It will stay hidden after the next sync.":"Remove "+id+" from the current Bad Orders list? It may return on the next report sync.";if(!confirm(message))return;if(isFhwaRow){const ids=completed();ids.add(id);localStorage.setItem(COMPLETED_KEY,JSON.stringify([...ids]));}const current=load();if(current){current[kind]=(current[kind]||[]).filter(item=>assetKey(item)!==id);localStorage.setItem(KEY,JSON.stringify(current))}if(selectedAsset===id)selectedAsset="";render(load());window.dispatchEvent(new Event("eod:reports-updated"))});
+ remove.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();const kind=isFhwaRow?"upcoming":"bad";const message=isFhwaRow?"Remove "+id+" from the FHWA Upcoming list? It will stay hidden after the next sync.":"Remove "+id+" from Bad Orders? It will stay hidden on this device after syncing.";if(!confirm(message))return;if(!isFhwaRow)removeBad(id);if(isFhwaRow){const ids=completed();ids.add(id);localStorage.setItem(COMPLETED_KEY,JSON.stringify([...ids]));}const current=load();if(current){current[kind]=(current[kind]||[]).filter(item=>assetKey(item)!==id);localStorage.setItem(KEY,JSON.stringify(current))}if(selectedAsset===id)selectedAsset="";render(load());window.dispatchEvent(new Event("eod:reports-updated"))});
  actionCell.append(remove);tr.append(actionCell);tbody.append(tr)}
  table.append(tbody);wrap.append(table);results.append(wrap);
  status.textContent="Updated "+new Date(data.updated).toLocaleString();
@@ -173,8 +176,8 @@ if(addInspection&&chassisNumber&&chassisPrefix){
  addInspection.addEventListener("click",()=>{pending=(chassisPrefix.value+" "+chassisNumber.value).toUpperCase().replace(/[^A-Z0-9]/g,"")},true);
  addInspection.addEventListener("click",()=>{
   if(pending&&chassisNumber.value===""&&/^(?:AIMZ|NSPZ|NSFZ)/.test(pending)){
-   const ids=completed();ids.add(pending);localStorage.setItem(COMPLETED_KEY,JSON.stringify([...ids]));
-   const data=load();if(data){data.upcoming=(data.upcoming||[]).filter(row=>assetKey(row)!==pending);localStorage.setItem(KEY,JSON.stringify(data))}
+   const ids=completed();ids.add(pending);localStorage.setItem(COMPLETED_KEY,JSON.stringify([...ids]));removeBad(pending);
+   const data=load();if(data){data.upcoming=(data.upcoming||[]).filter(row=>assetKey(row)!==pending);data.bad=(data.bad||[]).filter(row=>assetKey(row)!==pending);localStorage.setItem(KEY,JSON.stringify(data))}
    render(load());window.dispatchEvent(new Event("eod:reports-updated"));
    window.dispatchEvent(new CustomEvent("eod:inspection-removed",{detail:{asset:pending}}));
   }
